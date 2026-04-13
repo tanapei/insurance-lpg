@@ -1,0 +1,160 @@
+{
+  "goalCards": [
+
+    {
+      "id": "goal_01",
+      "title": "子どもの教育を充実させたい",
+      "category": "family",
+      "type": "A",
+      "hasRecurringCost": true,
+      "defaultMonthlySpend": 50000,
+      "activeStages": ["stage3"],
+      "requiredInsurance": [],
+      "achievementNote": "子育て期（stage3）の全ターンで教育費の支出を継続できること"
+    },
+
+    {
+      "id": "goal_02",
+      "title": "住宅ローンを完済して家を守りたい",
+      "category": "family",
+      "type": "C",
+      "hasRecurringCost": true,
+      "defaultMonthlySpend": 50000,
+      "activeStages": ["stage2", "stage3", "stage4"],
+      "requiredInsurance": ["disability", "accident"],
+      "requiredOptionalCost": null,
+      "achievementNote": "自立期〜充実期の全ターンで住宅費の支出を継続し、就業不能保険または傷害保険が機能すること"
+    },
+
+    {
+      "id": "goal_03",
+      "title": "介護で家族に迷惑をかけたくない",
+      "category": "family",
+      "type": "B",
+      "hasRecurringCost": false,
+      "defaultMonthlySpend": 0,
+      "activeStages": [],
+      "requiredInsurance": ["nursing"],
+      "achievementNote": "介護イベント発生時に介護保険（民間）が適用されること"
+    },
+
+    {
+      "id": "goal_04",
+      "title": "病気になっても最善の治療を受けたい",
+      "category": "health",
+      "type": "B",
+      "hasRecurringCost": false,
+      "defaultMonthlySpend": 0,
+      "activeStages": [],
+      "requiredInsurance": ["medical", "cancer"],
+      "achievementNote": "病気・入院イベント発生時に医療保険またはがん保険が適用されること"
+    },
+
+    {
+      "id": "goal_05",
+      "title": "健康寿命を延ばしたい",
+      "category": "health",
+      "type": "A",
+      "hasRecurringCost": true,
+      "defaultMonthlySpend": 15000,
+      "activeStages": ["stage1", "stage2", "stage3", "stage4", "stage5", "stage6"],
+      "requiredInsurance": [],
+      "achievementNote": "全ステージの全ターンで健康投資の支出を継続できること"
+    },
+
+    {
+      "id": "goal_06",
+      "title": "最後まで自宅で暮らしたい",
+      "category": "health",
+      "type": "C",
+      "hasRecurringCost": true,
+      "defaultMonthlySpend": 20000,
+      "activeStages": ["stage5", "stage6"],
+      "requiredInsurance": ["nursing"],
+      "achievementNote": "老後期〜総括期の全ターンで在宅サポート費用の支出を継続し、介護保険が機能すること"
+    },
+
+    {
+      "id": "goal_07",
+      "title": "好きな仕事を定年まで続けたい",
+      "category": "career",
+      "type": "B",
+      "hasRecurringCost": false,
+      "defaultMonthlySpend": 0,
+      "activeStages": [],
+      "requiredInsurance": ["disability"],
+      "achievementNote": "就労不能イベント発生時に就業不能保険が適用されること"
+    },
+
+    {
+      "id": "goal_08",
+      "title": "事故に遭っても生活を立て直したい",
+      "category": "career",
+      "type": "B",
+      "hasRecurringCost": false,
+      "defaultMonthlySpend": 0,
+      "activeStages": [],
+      "requiredInsurance": ["accident"],
+      "achievementNote": "事故・災害イベント発生時に傷害保険が適用されること"
+    },
+
+    {
+      "id": "goal_09",
+      "title": "定年後もやりがいある仕事を続けたい",
+      "category": "career",
+      "type": "A",
+      "hasRecurringCost": true,
+      "defaultMonthlySpend": 20000,
+      "activeStages": ["stage5"],
+      "requiredInsurance": [],
+      "achievementNote": "老後期（stage5）の全ターンでセカンドキャリアへの支出を継続できること"
+    },
+
+    {
+      "id": "goal_10",
+      "title": "老後の生活水準を落としたくない",
+      "category": "retirement",
+      "type": "A",
+      "hasRecurringCost": true,
+      "defaultMonthlySpend": 30000,
+      "activeStages": ["stage5", "stage6"],
+      "requiredInsurance": [],
+      "achievementNote": "老後期〜総括期の全ターンで生活費の支出を継続できること"
+    },
+
+    {
+      "id": "goal_11",
+      "title": "老後資産づくりを今から始めたい",
+      "category": "retirement",
+      "type": "A",
+      "hasRecurringCost": true,
+      "defaultMonthlySpend": 30000,
+      "activeStages": ["stage2", "stage3", "stage4"],
+      "requiredInsurance": [],
+      "achievementNote": "自立期〜充実期の全ターンで積立・資産形成の支出を継続できること"
+    },
+
+    {
+      "id": "goal_12",
+      "title": "大切な人に資産を遺したい",
+      "category": "retirement",
+      "type": "B",
+      "hasRecurringCost": false,
+      "defaultMonthlySpend": 0,
+      "activeStages": [],
+      "requiredInsurance": ["wholeLife"],
+      "achievementNote": "終身保険に加入したまま相続・資産整理ストップを迎えること"
+    }
+
+  ],
+  "spendingAdjustmentRange": {
+    "minRate": 0.5,
+    "maxRate": 2.0,
+    "note": "デフォルト月額の50%〜200%の範囲で強制ストップ時に変更可能"
+  },
+  "achievementLevels": {
+    "achieved":        { "label": "達成",     "scoreWeight": 1.0 },
+    "partialAchieved": { "label": "一部達成", "scoreWeight": 0.5 },
+    "notAchieved":     { "label": "未達成",   "scoreWeight": 0.0 }
+  }
+}

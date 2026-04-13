@@ -1,0 +1,120 @@
+{
+  "stages": [
+    {
+      "id": "stage1",
+      "name": "青春期",
+      "ageRange": "18〜21歳",
+      "turns": 2,
+      "yearsPerTurn": 2,
+      "monthlyIncome": 160000,
+      "annualBasicExpense": 165,
+      "description": "学生・就職活動期。収入は少なくリスクも限定的だが、保険の基礎を学ぶ重要な時期。",
+      "mandatoryStopBefore": {
+        "stopId": "gameStart",
+        "stopName": "ゲーム開始",
+        "description": "ゲーム開始時。ライフスタイルと目的カードを選択し、初回保険を選択する。",
+        "optionalCost": null
+      }
+    },
+    {
+      "id": "stage2",
+      "name": "自立期",
+      "ageRange": "22〜30歳",
+      "turns": 3,
+      "yearsPerTurn": 3,
+      "monthlyIncome": 250000,
+      "annualBasicExpense": 220,
+      "description": "就職・社会人デビュー期。収入が安定し始め、保険の必要性を実感し始める。",
+      "mandatoryStopBefore": {
+        "stopId": "employment",
+        "stopName": "就職・社会人デビュー",
+        "description": "社会人になるタイミングで保険を見直す。加入タイミング乗数: ×1.2。",
+        "optionalCost": null
+      }
+    },
+    {
+      "id": "stage3",
+      "name": "子育て期",
+      "ageRange": "31〜38歳",
+      "turns": 4,
+      "yearsPerTurn": 2,
+      "monthlyIncome": 350000,
+      "annualBasicExpense": 260,
+      "description": "結婚・出産期。家族を守るための保険需要が高まる。支出も増え資産管理が重要。",
+      "mandatoryStopBefore": {
+        "stopId": "marriage",
+        "stopName": "結婚",
+        "description": "結婚のタイミングで家族向け保険を見直す。加入タイミング乗数: ×1.5。",
+        "optionalCost": { "amount": 300, "label": "結婚式・披露宴・新婚旅行" }
+      }
+    },
+    {
+      "id": "stage4",
+      "name": "充実期",
+      "ageRange": "39〜59歳",
+      "turns": 7,
+      "yearsPerTurn": 3,
+      "monthlyIncome": 450000,
+      "annualBasicExpense": 370,
+      "description": "キャリアのピーク・子育て後期。収入は最大だが、健康リスクも増加してくる。",
+      "mandatoryStopBefore": {
+        "stopId": "childbirth",
+        "stopName": "子どもの誕生",
+        "description": "子どもが生まれるタイミングで教育・生命保険を見直す。加入タイミング乗数: ×2.0。",
+        "optionalCost": { "amount": 100, "label": "出産費用・育児準備・ベビー用品" }
+      }
+    },
+    {
+      "id": "stage5",
+      "name": "老後期",
+      "ageRange": "60〜71歳",
+      "turns": 4,
+      "yearsPerTurn": 3,
+      "monthlyIncome": 200000,
+      "annualBasicExpense": 200,
+      "description": "定年退職・再雇用期。年金と貯蓄が主な収入源に。介護・医療リスクが高まる。",
+      "mandatoryStopBefore": {
+        "stopId": "retirement",
+        "stopName": "定年退職・再雇用",
+        "description": "退職のタイミングで老後向け保険を見直す。加入タイミング乗数: ×3.0。就労不能・収入保障保険は加入不可。",
+        "optionalCost": { "amount": 100, "label": "退職後のライフスタイル整備・趣味の初期費用" }
+      }
+    },
+    {
+      "id": "stage6",
+      "name": "総括期",
+      "ageRange": "72〜81歳",
+      "turns": 2,
+      "yearsPerTurn": 5,
+      "monthlyIncome": 150000,
+      "annualBasicExpense": 155,
+      "description": "人生の総括期。年金・資産を守りながら、相続や介護への備えが最重要となる。",
+      "mandatoryStopBefore": {
+        "stopId": "inheritance",
+        "stopName": "相続・資産整理",
+        "description": "資産整理のタイミングで最終的な保険を見直す。加入タイミング乗数: ×5.0。就労不能・収入保障保険は加入不可。",
+        "optionalCost": { "amount": 150, "label": "葬儀・お墓・相続手続き・家財整理" }
+      }
+    }
+  ],
+  "summary": {
+    "totalStages": 6,
+    "totalTurns": 18,
+    "turnsPerStage": [2, 3, 4, 3, 4, 2],
+    "yearsPerTurnByStage": [2, 3, 2, 7, 3, 5],
+    "totalYearsCovered": 64,
+    "mandatoryStops": 6,
+    "note": "各ステージ開始前に強制ストップを1回行う（ゲーム開始時含む計6回）。収入・基礎生活費・保険料・目的支出はすべて年額×経過年数で計算。イベント損失は経過年数によらず固定額。"
+  },
+  "mandatoryStopRules": {
+    "description": "強制ストップでは以下を行う",
+    "actions": [
+      "一時費用の支払い選択（任意・optionalCostがnullのストップは発生しない）",
+      "現在の保険加入状況を確認",
+      "新規保険への加入または既存保険の解約が可能",
+      "ゴール達成に必要な保険を改めて確認する",
+      "目的カードの月次支出金額を±調整可能（デフォルトの50〜200%の範囲）"
+    ],
+    "timingNote": "ステージ移行時に加入した保険の乗数は、そのステージに対応するstopIdのmultiplierが適用される"
+  }
+}

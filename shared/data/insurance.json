@@ -1,0 +1,133 @@
+{
+  "insuranceTypes": [
+    {
+      "id": "medical",
+      "name": "医療保険",
+      "baseMonthlyPremium": 2000,
+      "coverageCategories": ["medical"],
+      "coverageCondition": null,
+      "reductionRate": 0.70,
+      "combinedReductionCap": 0.90,
+      "specialEffect": null,
+      "minEnrollmentStop": null,
+      "maxEnrollmentStop": null,
+      "description": "病気・入院時の費用を70%軽減。入院給付金＋手術給付金。掛け捨て型で早期加入ほど割安。"
+    },
+    {
+      "id": "cancer",
+      "name": "がん保険",
+      "baseMonthlyPremium": 2000,
+      "coverageCategories": ["medical"],
+      "coverageCondition": "cancer_only",
+      "reductionRate": 0.80,
+      "combinedReductionCap": 0.90,
+      "specialEffect": null,
+      "minEnrollmentStop": null,
+      "maxEnrollmentStop": null,
+      "description": "がんイベント限定で80%軽減。医療保険と併用で最大90%軽減。診断一時金＋治療給付。"
+    },
+    {
+      "id": "disability",
+      "name": "就業不能保険",
+      "baseMonthlyPremium": 4000,
+      "coverageCategories": ["disability"],
+      "coverageCondition": null,
+      "reductionRate": 0.75,
+      "combinedReductionCap": 0.90,
+      "specialEffect": null,
+      "minEnrollmentStop": null,
+      "maxEnrollmentStop": "childbirth",
+      "description": "就労不能時の損失を75%軽減。月収の約70〜75%を給付。子どもの誕生ストップまで加入可能。"
+    },
+    {
+      "id": "accident",
+      "name": "傷害保険",
+      "baseMonthlyPremium": 1500,
+      "coverageCategories": ["accident"],
+      "coverageCondition": null,
+      "reductionRate": 0.70,
+      "combinedReductionCap": 0.90,
+      "specialEffect": null,
+      "minEnrollmentStop": null,
+      "maxEnrollmentStop": null,
+      "description": "事故・災害による損失を70%軽減。交通事故・自然災害など不慮の事故に備える。全ステージ加入可。"
+    },
+    {
+      "id": "wholeLife",
+      "name": "終身保険",
+      "baseMonthlyPremium": 10000,
+      "coverageCategories": [],
+      "coverageCondition": null,
+      "reductionRate": 0,
+      "combinedReductionCap": 0,
+      "specialEffect": "deathBenefit",
+      "minEnrollmentStop": null,
+      "maxEnrollmentStop": null,
+      "deathBenefitByStop": {
+        "gameStart":   500,
+        "employment":  400,
+        "marriage":    300,
+        "childbirth":  200,
+        "retirement":  100,
+        "inheritance":  50
+      },
+      "description": "イベント軽減なし。ゲーム終了時に加入時期に応じた死亡保険金（万円）を資産に加算。早期加入ほど高額。"
+    },
+    {
+      "id": "nursing",
+      "name": "介護保険（民間）",
+      "baseMonthlyPremium": 6000,
+      "coverageCategories": ["care"],
+      "coverageCondition": null,
+      "reductionRate": 0.70,
+      "combinedReductionCap": 0.90,
+      "specialEffect": null,
+      "minEnrollmentStop": "marriage",
+      "maxEnrollmentStop": null,
+      "description": "介護イベント時の損失を70%軽減。結婚ストップ以降から加入可能。早期加入ほど長期保障。"
+    },
+    {
+      "id": "personalPension",
+      "name": "個人年金保険",
+      "baseMonthlyPremium": 20000,
+      "coverageCategories": [],
+      "coverageCondition": null,
+      "reductionRate": 0,
+      "combinedReductionCap": 0,
+      "specialEffect": "additionalRetirementIncome",
+      "minEnrollmentStop": null,
+      "maxEnrollmentStop": "retirement",
+      "additionalMonthlyIncome": 50000,
+      "pensionBonusByStop": {
+        "gameStart":  76000,
+        "employment": 70000,
+        "marriage":   59000,
+        "childbirth": 50000,
+        "retirement": 39000
+      },
+      "_balanceNote": "【B1-2】給付額設計: 運用倍率はgameStart×2.0〜retirement×1.2。給付期間=stage5(12年)+stage6(10年)=264ヶ月。純利益: gameStart+1008万, employment+766万, marriage+522万, childbirth+312万, retirement+165万。全加入タイミングで元本超過。早期加入ほど絶対純利益が大きいトレードオフ設計。",
+      "description": "老後期以降のターン収入を増額。加入タイミングで受取額が変化（18歳:+7.6万/月〜定年:+3.9万/月）。早期加入ほど大きな複利効果。定年ストップまで加入可能。"
+    },
+    {
+      "id": "variableAnnuity",
+      "name": "変額・外貨建て保険",
+      "baseMonthlyPremium": 5000,
+      "coverageCategories": ["asset"],
+      "coverageCondition": null,
+      "reductionRate": 0.40,
+      "combinedReductionCap": 0.40,
+      "specialEffect": null,
+      "minEnrollmentStop": null,
+      "maxEnrollmentStop": null,
+      "description": "資産変動イベントの損失を40%軽減。投資リスクを保険でヘッジする商品。"
+    }
+  ],
+  "timingMultipliers": [
+    { "stopId": "gameStart",   "stopName": "ゲーム開始時",         "ageGuide": "18歳", "multiplier": 1.0 },
+    { "stopId": "employment",  "stopName": "就職・社会人デビュー", "ageGuide": "22歳", "multiplier": 1.2 },
+    { "stopId": "marriage",    "stopName": "結婚",                 "ageGuide": "30歳", "multiplier": 1.5 },
+    { "stopId": "childbirth",  "stopName": "子どもの誕生",         "ageGuide": "38歳", "multiplier": 2.0 },
+    { "stopId": "retirement",  "stopName": "定年退職・再雇用",     "ageGuide": "60歳", "multiplier": 3.0 },
+    { "stopId": "inheritance", "stopName": "相続・資産整理",       "ageGuide": "70歳", "multiplier": 4.0 }
+  ]
+}

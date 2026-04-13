@@ -1,0 +1,68 @@
+{
+  "lifestyles": [
+    {
+      "id": "steady",
+      "name": "堅実型",
+      "difficulty": 2,
+      "initialAssets": 100,
+      "description": "安定志向・支出が少ない。リスクイベント発生率が低め。保険の基本を学ぶのに最適。",
+      "keyInsurance": ["medical", "personalPension"],
+      "stageProbabilities": {
+        "stage1": { "medical": 8,  "accident": 12, "disability": 10, "care": 0,  "asset": 8,  "lucky": 62 },
+        "stage2": { "medical": 12, "accident": 13, "disability": 13, "care": 0,  "asset": 12, "lucky": 50 },
+        "stage3": { "medical": 15, "accident": 10, "disability": 18, "care": 8,  "asset": 10, "lucky": 39 },
+        "stage4": { "medical": 20, "accident": 7,  "disability": 15, "care": 18, "asset": 13, "lucky": 27 },
+        "stage5": { "medical": 28, "accident": 3,  "disability": 0,  "care": 28, "asset": 18, "lucky": 23 },
+        "stage6": { "medical": 33, "accident": 3,  "disability": 0,  "care": 28, "asset": 18, "lucky": 18 }
+      }
+    },
+    {
+      "id": "family",
+      "name": "家族重視型",
+      "difficulty": 3,
+      "initialAssets": 50,
+      "description": "子育て・介護を重視。介護・就労不能リスクが高め。バランス型。",
+      "keyInsurance": ["incomeProtection", "nursing", "wholeLife"],
+      "stageProbabilities": {
+        "stage1": { "medical": 10, "accident": 18, "disability": 12, "care": 0,  "asset": 10, "lucky": 50 },
+        "stage2": { "medical": 15, "accident": 18, "disability": 18, "care": 0,  "asset": 14, "lucky": 35 },
+        "stage3": { "medical": 20, "accident": 12, "disability": 22, "care": 18, "asset": 13, "lucky": 15 },
+        "stage4": { "medical": 22, "accident": 8,  "disability": 18, "care": 30, "asset": 14, "lucky": 8  },
+        "stage5": { "medical": 33, "accident": 4,  "disability": 0,  "care": 40, "asset": 15, "lucky": 8  },
+        "stage6": { "medical": 38, "accident": 3,  "disability": 0,  "care": 40, "asset": 15, "lucky": 4  }
+      }
+    },
+    {
+      "id": "career",
+      "name": "キャリア重視型",
+      "difficulty": 4,
+      "initialAssets": 150,
+      "description": "収入高め・仕事中心。就労不能・病気リスクが高く、ラッキーが少ない。初期資産は高いが油断禁物。",
+      "keyInsurance": ["disability", "incomeProtection", "cancer"],
+      "stageProbabilities": {
+        "stage1": { "medical": 12, "accident": 15, "disability": 25, "care": 0,  "asset": 10, "lucky": 38 },
+        "stage2": { "medical": 18, "accident": 15, "disability": 32, "care": 0,  "asset": 12, "lucky": 23 },
+        "stage3": { "medical": 28, "accident": 10, "disability": 35, "care": 5,  "asset": 12, "lucky": 10 },
+        "stage4": { "medical": 32, "accident": 8,  "disability": 30, "care": 15, "asset": 10, "lucky": 5  },
+        "stage5": { "medical": 42, "accident": 5,  "disability": 0,  "care": 28, "asset": 18, "lucky": 7  },
+        "stage6": { "medical": 48, "accident": 4,  "disability": 0,  "care": 28, "asset": 17, "lucky": 3  }
+      }
+    },
+    {
+      "id": "challenge",
+      "name": "チャレンジ型",
+      "difficulty": 5,
+      "initialAssets": 0,
+      "description": "変化を好む・リスクテイカー。資産変動リスクが最大。ラッキーも出やすいが初期資産が少なく綱渡り。",
+      "keyInsurance": ["medical", "disability", "variableAnnuity"],
+      "stageProbabilities": {
+        "stage1": { "medical": 10, "accident": 25, "disability": 10, "care": 0,  "asset": 20, "lucky": 35 },
+        "stage2": { "medical": 13, "accident": 22, "disability": 15, "care": 0,  "asset": 28, "lucky": 22 },
+        "stage3": { "medical": 18, "accident": 18, "disability": 18, "care": 8,  "asset": 25, "lucky": 13 },
+        "stage4": { "medical": 22, "accident": 12, "disability": 18, "care": 15, "asset": 28, "lucky": 5  },
+        "stage5": { "medical": 32, "accident": 5,  "disability": 0,  "care": 25, "asset": 30, "lucky": 8  },
+        "stage6": { "medical": 35, "accident": 4,  "disability": 0,  "care": 25, "asset": 32, "lucky": 4  }
+      }
+    }
+  ]
+}

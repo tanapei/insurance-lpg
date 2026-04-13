@@ -1,0 +1,270 @@
+{
+  "eventCategories": {
+    "medical":    { "name": "病気・入院",   "color": "#E74C3C" },
+    "accident":   { "name": "事故・災害",   "color": "#E67E22" },
+    "disability": { "name": "就労不能",     "color": "#8E44AD" },
+    "care":       { "name": "介護",         "color": "#16A085" },
+    "asset":      { "name": "資産変動",     "color": "#2980B9" },
+    "lucky":      { "name": "ラッキー",     "color": "#F39C12" }
+  },
+  "severityLevels": {
+    "light":  { "label": "軽度", "drawWeight": 3 },
+    "medium": { "label": "中度", "drawWeight": 2 },
+    "heavy":  { "label": "重度", "drawWeight": 1 }
+  },
+  "note": "amount: 負の値＝資産減少（損失）、正の値＝資産増加（ラッキー）。単位：万円。stageAmounts: ステージIDをキーとした上書き金額（nullの場合はamountを適用）。availableStages: 出現可能ステージ（nullは全ステージ）。",
+  "events": [
+
+    { "id": "ev_med_01", "category": "medical", "severity": "light",
+      "title": "風邪・インフルエンザ",
+      "description": "高熱が続き、数日の通院と市販薬・医療費の費用がかさんだ。仕事を休んだ分の影響も。",
+      "amount": -20, "isCancerEvent": false, "availableStages": null,
+      "stageAmounts": { "stage5": -25, "stage6": -30 } },
+
+    { "id": "ev_med_02", "category": "medical", "severity": "light",
+      "title": "歯科治療",
+      "description": "奥歯の虫歯が進行し、インプラントや詰め物を含む治療が必要になった。",
+      "amount": -35, "isCancerEvent": false, "availableStages": null,
+      "stageAmounts": null },
+
+    { "id": "ev_med_03", "category": "medical", "severity": "light",
+      "title": "アレルギー・皮膚疾患",
+      "description": "慢性アレルギーが悪化し、定期通院と薬代が継続的に発生した。",
+      "amount": -20, "isCancerEvent": false, "availableStages": null,
+      "stageAmounts": { "stage5": -25, "stage6": -30 } },
+
+    { "id": "ev_med_04", "category": "medical", "severity": "medium",
+      "title": "盲腸・短期入院",
+      "description": "急性虫垂炎で緊急入院・手術。1週間の入院と療養期間が発生した。",
+      "amount": -80, "isCancerEvent": false, "availableStages": ["stage1","stage2","stage3","stage4","stage5"],
+      "stageAmounts": { "stage1": -60, "stage5": -100 } },
+
+    { "id": "ev_med_05", "category": "medical", "severity": "medium",
+      "title": "骨折・外科手術",
+      "description": "転倒による骨折で手術が必要になり、リハビリ期間を含め長引いた。",
+      "amount": -100, "isCancerEvent": false, "availableStages": null,
+      "stageAmounts": { "stage1": -60, "stage2": -80, "stage5": -150, "stage6": -180 } },
+
+    { "id": "ev_med_06", "category": "medical", "severity": "medium",
+      "title": "糖尿病・生活習慣病",
+      "description": "検査で糖尿病と診断。定期通院と薬代、食事管理にかかる費用が続く。",
+      "amount": -90, "isCancerEvent": false, "availableStages": ["stage2","stage3","stage4","stage5","stage6"],
+      "stageAmounts": { "stage2": -60, "stage3": -80, "stage5": -120, "stage6": -140 } },
+
+    { "id": "ev_med_07", "category": "medical", "severity": "heavy",
+      "title": "がん（悪性腫瘍）",
+      "description": "がんが発見され、手術・抗がん剤・放射線治療を受けた。治療は長期に及ぶ。",
+      "amount": -300, "isCancerEvent": true, "availableStages": ["stage2","stage3","stage4","stage5","stage6"],
+      "stageAmounts": { "stage2": -250, "stage3": -280, "stage5": -330, "stage6": -380 } },
+
+    { "id": "ev_med_08", "category": "medical", "severity": "heavy",
+      "title": "心疾患・長期入院",
+      "description": "心筋梗塞で緊急搬送。ICU入室・手術・長期リハビリで高額な医療費が発生した。",
+      "amount": -280, "isCancerEvent": false, "availableStages": ["stage3","stage4","stage5","stage6"],
+      "stageAmounts": { "stage3": -220, "stage5": -310, "stage6": -360 } },
+
+    { "id": "ev_med_09", "category": "medical", "severity": "heavy",
+      "title": "脳卒中・高度先進医療",
+      "description": "脳梗塞で倒れ、最新治療とリハビリを選択。高度先進医療費が自己負担となった。",
+      "amount": -330, "isCancerEvent": false, "availableStages": ["stage4","stage5","stage6"],
+      "stageAmounts": { "stage5": -360, "stage6": -400 } },
+
+
+    { "id": "ev_acc_01", "category": "accident", "severity": "light",
+      "title": "自転車・バイク事故",
+      "description": "自転車で転倒し、相手への賠償と自身の治療費が発生した。",
+      "amount": -35, "isCancerEvent": false, "availableStages": ["stage1","stage2","stage3","stage4"],
+      "stageAmounts": { "stage1": -25, "stage2": -30 } },
+
+    { "id": "ev_acc_02", "category": "accident", "severity": "light",
+      "title": "家電・設備の故障",
+      "description": "給湯器や冷蔵庫が突然故障し、緊急交換費用が必要になった。",
+      "amount": -30, "isCancerEvent": false, "availableStages": ["stage2","stage3","stage4","stage5","stage6"],
+      "stageAmounts": null },
+
+    { "id": "ev_acc_03", "category": "accident", "severity": "medium",
+      "title": "交通事故（被害）",
+      "description": "追突事故に遭い、むち打ちで数ヶ月の通院と休業損害が発生した。",
+      "amount": -120, "isCancerEvent": false, "availableStages": null,
+      "stageAmounts": { "stage1": -70, "stage2": -90, "stage5": -130, "stage6": -130 } },
+
+    { "id": "ev_acc_04", "category": "accident", "severity": "medium",
+      "title": "水害・台風被害",
+      "description": "大型台風で自宅・賃貸物件が浸水し、修繕費と家財の買い替えが必要になった。",
+      "amount": -150, "isCancerEvent": false, "availableStages": ["stage2","stage3","stage4","stage5","stage6"],
+      "stageAmounts": null },
+
+    { "id": "ev_acc_05", "category": "accident", "severity": "heavy",
+      "title": "重大交通事故",
+      "description": "重大な交通事故で長期入院・リハビリが必要となり、高額の治療費が発生した。",
+      "amount": -300, "isCancerEvent": false, "availableStages": null,
+      "stageAmounts": { "stage1": -180, "stage2": -240, "stage5": -320, "stage6": -320 } },
+
+    { "id": "ev_acc_06", "category": "accident", "severity": "heavy",
+      "title": "火災・全壊災害",
+      "description": "火災により自宅が全焼。仮住まいの費用と再建・引越しコストが重くのしかかった。",
+      "amount": -400, "isCancerEvent": false, "availableStages": ["stage2","stage3","stage4","stage5","stage6"],
+      "stageAmounts": null },
+
+
+    { "id": "ev_dis_01", "category": "disability", "severity": "light",
+      "title": "精神的疲弊・短期休職",
+      "description": "過重労働とストレスで適応障害を発症し、3ヶ月の休職が必要になった。",
+      "amount": -80, "isCancerEvent": false, "availableStages": ["stage2","stage3","stage4"],
+      "stageAmounts": { "stage2": -60, "stage3": -80, "stage4": -100 } },
+
+    { "id": "ev_dis_02", "category": "disability", "severity": "light",
+      "title": "腰痛・ヘルニア",
+      "description": "ヘルニアが悪化し、デスクワークや立ち仕事が困難に。一時的に収入が減少した。",
+      "amount": -70, "isCancerEvent": false, "availableStages": ["stage2","stage3","stage4","stage5"],
+      "stageAmounts": { "stage2": -50, "stage3": -70, "stage4": -90, "stage5": -60 } },
+
+    { "id": "ev_dis_03", "category": "disability", "severity": "medium",
+      "title": "うつ病・中期休職",
+      "description": "うつ病と診断され、6ヶ月の休職。傷病手当だけでは生活費が不足した。",
+      "amount": -180, "isCancerEvent": false, "availableStages": ["stage2","stage3","stage4"],
+      "stageAmounts": { "stage2": -120, "stage3": -160, "stage4": -210 } },
+
+    { "id": "ev_dis_04", "category": "disability", "severity": "medium",
+      "title": "事故による長期療養",
+      "description": "事故で重傷を負い、半年以上の療養を余儀なくされた。収入が大きく落ち込んだ。",
+      "amount": -200, "isCancerEvent": false, "availableStages": ["stage1","stage2","stage3","stage4","stage5"],
+      "stageAmounts": { "stage1": -100, "stage2": -150, "stage3": -200, "stage4": -250, "stage5": -150 } },
+
+    { "id": "ev_dis_05", "category": "disability", "severity": "heavy",
+      "title": "重篤疾患による長期就労不能",
+      "description": "重い病気で1年以上働けなくなり、収入がほぼ途絶えた。貯蓄が大幅に減少した。",
+      "amount": -350, "isCancerEvent": false, "availableStages": ["stage2","stage3","stage4"],
+      "stageAmounts": { "stage2": -250, "stage3": -320, "stage4": -400 } },
+
+    { "id": "ev_dis_06", "category": "disability", "severity": "heavy",
+      "title": "障害認定・就労困難",
+      "description": "事故や病気により障害が残り、以前と同様の就労が困難になった。住環境の改修も必要に。",
+      "amount": -400, "isCancerEvent": false, "availableStages": ["stage2","stage3","stage4","stage5"],
+      "stageAmounts": { "stage2": -300, "stage3": -380, "stage4": -450, "stage5": -200 } },
+
+
+    { "id": "ev_care_01", "category": "care", "severity": "light",
+      "title": "親の軽度介護",
+      "description": "親が要介護1と認定。週数回のヘルパー利用と交通費・見守り費用が発生した。",
+      "amount": -60, "isCancerEvent": false, "availableStages": ["stage3","stage4","stage5","stage6"],
+      "stageAmounts": { "stage5": -80, "stage6": -100 } },
+
+    { "id": "ev_care_02", "category": "care", "severity": "light",
+      "title": "配偶者の通院サポート",
+      "description": "配偶者が足腰の衰えで定期通院が必要になり、付き添いと費用負担が続く。",
+      "amount": -50, "isCancerEvent": false, "availableStages": ["stage4","stage5","stage6"],
+      "stageAmounts": { "stage5": -70, "stage6": -90 } },
+
+    { "id": "ev_care_03", "category": "care", "severity": "medium",
+      "title": "親の中度介護・施設検討",
+      "description": "親が要介護3に。グループホームへの入居を検討し、初期費用と月額費用が発生した。",
+      "amount": -180, "isCancerEvent": false, "availableStages": ["stage3","stage4","stage5"],
+      "stageAmounts": { "stage3": -150, "stage4": -180, "stage5": -200 } },
+
+    { "id": "ev_care_04", "category": "care", "severity": "medium",
+      "title": "自身の介護予防・リハビリ",
+      "description": "転倒による骨折後、介護予防リハビリが必要になった。通所費用が継続的にかかる。",
+      "amount": -150, "isCancerEvent": false, "availableStages": ["stage5","stage6"],
+      "stageAmounts": { "stage6": -180 } },
+
+    { "id": "ev_care_05", "category": "care", "severity": "heavy",
+      "title": "重度介護・特別養護老人ホーム入所",
+      "description": "要介護5となり特別養護老人ホームへ入所。入居一時金と高額な月額費用が発生した。",
+      "amount": -380, "isCancerEvent": false, "availableStages": ["stage4","stage5","stage6"],
+      "stageAmounts": { "stage4": -300, "stage5": -380, "stage6": -420 } },
+
+    { "id": "ev_care_06", "category": "care", "severity": "heavy",
+      "title": "認知症・長期施設入所",
+      "description": "認知症が進行し、専門施設への長期入所が必要になった。費用は長期にわたって重い。",
+      "amount": -350, "isCancerEvent": false, "availableStages": ["stage5","stage6"],
+      "stageAmounts": { "stage6": -400 } },
+
+
+    { "id": "ev_ast_01", "category": "asset", "severity": "light",
+      "title": "株価下落・小損失",
+      "description": "保有株が急落。売却タイミングを逃し、含み損が実損に変わった。",
+      "amount": -50, "isCancerEvent": false, "availableStages": ["stage2","stage3","stage4","stage5","stage6"],
+      "stageAmounts": { "stage2": -30, "stage3": -50, "stage4": -80, "stage5": -60, "stage6": -40 } },
+
+    { "id": "ev_ast_02", "category": "asset", "severity": "light",
+      "title": "予期せぬ出費",
+      "description": "冠婚葬祭が重なり、また急な修繕費なども重なって予想外の支出が続いた。",
+      "amount": -40, "isCancerEvent": false, "availableStages": null,
+      "stageAmounts": { "stage1": -20, "stage2": -30, "stage3": -40, "stage4": -50, "stage5": -40, "stage6": -30 } },
+
+    { "id": "ev_ast_03", "category": "asset", "severity": "medium",
+      "title": "投資失敗・中程度の損失",
+      "description": "FXや仮想通貨への投資が裏目に出て、まとまった損失が発生した。",
+      "amount": -150, "isCancerEvent": false, "availableStages": ["stage2","stage3","stage4","stage5","stage6"],
+      "stageAmounts": { "stage2": -80, "stage3": -150, "stage4": -250, "stage5": -200, "stage6": -120 } },
+
+    { "id": "ev_ast_04", "category": "asset", "severity": "medium",
+      "title": "リストラ・収入減",
+      "description": "会社の経営悪化でリストラに遭い、数ヶ月間の収入が途絶えた。",
+      "amount": -130, "isCancerEvent": false, "availableStages": ["stage2","stage3","stage4"],
+      "stageAmounts": { "stage2": -100, "stage3": -150, "stage4": -200 } },
+
+    { "id": "ev_ast_05", "category": "asset", "severity": "heavy",
+      "title": "事業失敗・大幅損失",
+      "description": "副業・起業が失敗し、投じた資金のほぼ全額を失った。",
+      "amount": -350, "isCancerEvent": false, "availableStages": ["stage2","stage3","stage4","stage5"],
+      "stageAmounts": { "stage2": -150, "stage3": -280, "stage4": -400, "stage5": -200 } },
+
+    { "id": "ev_ast_06", "category": "asset", "severity": "heavy",
+      "title": "詐欺・大規模資産流出",
+      "description": "投資詐欺や不正アクセスに遭い、まとまった資産を失ってしまった。",
+      "amount": -300, "isCancerEvent": false, "availableStages": null,
+      "stageAmounts": { "stage1": -50, "stage2": -100, "stage3": -200, "stage4": -300, "stage5": -380, "stage6": -380 } },
+
+
+    { "id": "ev_lck_01", "category": "lucky", "severity": "light",
+      "title": "節税・還付金",
+      "description": "確定申告の見直しで税金の還付金が戻ってきた。ふるさと納税も活用した。",
+      "amount": 30, "isCancerEvent": false, "availableStages": ["stage2","stage3","stage4","stage5","stage6"],
+      "stageAmounts": { "stage2": 20, "stage3": 30, "stage4": 50, "stage5": 35, "stage6": 20 } },
+
+    { "id": "ev_lck_02", "category": "lucky", "severity": "light",
+      "title": "副業・スモールビジネス収入",
+      "description": "スキルを活かした副業が軌道に乗り、コンスタントな収入が得られた。",
+      "amount": 40, "isCancerEvent": false, "availableStages": ["stage2","stage3","stage4","stage5"],
+      "stageAmounts": { "stage2": 30, "stage3": 50, "stage4": 70, "stage5": 40 } },
+
+    { "id": "ev_lck_03", "category": "lucky", "severity": "light",
+      "title": "生活費の節約成功",
+      "description": "固定費の見直しと節約習慣が実を結び、年間支出を大幅に削減できた。",
+      "amount": 35, "isCancerEvent": false, "availableStages": null,
+      "stageAmounts": { "stage1": 20, "stage2": 30, "stage3": 40, "stage4": 50, "stage5": 35, "stage6": 25 } },
+
+    { "id": "ev_lck_04", "category": "lucky", "severity": "medium",
+      "title": "昇進・昇給",
+      "description": "実績が認められ、大幅な昇給と役職手当が加わった。",
+      "amount": 80, "isCancerEvent": false, "availableStages": ["stage2","stage3","stage4"],
+      "stageAmounts": { "stage2": 60, "stage3": 90, "stage4": 130 } },
+
+    { "id": "ev_lck_05", "category": "lucky", "severity": "medium",
+      "title": "投資利益・配当収入",
+      "description": "長期保有の株式が大きく値上がりし、売却益や配当を得た。",
+      "amount": 100, "isCancerEvent": false, "availableStages": ["stage2","stage3","stage4","stage5","stage6"],
+      "stageAmounts": { "stage2": 60, "stage3": 100, "stage4": 150, "stage5": 120, "stage6": 80 } },
+
+    { "id": "ev_lck_06", "category": "lucky", "severity": "medium",
+      "title": "相続・贈与",
+      "description": "親族からの贈与があり、まとまった資産が手に入った。",
+      "amount": 120, "isCancerEvent": false, "availableStages": ["stage3","stage4","stage5","stage6"],
+      "stageAmounts": { "stage3": 100, "stage4": 150, "stage5": 200, "stage6": 150 } },
+
+    { "id": "ev_lck_07", "category": "lucky", "severity": "heavy",
+      "title": "事業大成功・売却益",
+      "description": "立ち上げた事業が買収オファーを受け、大きなキャピタルゲインを得た。",
+      "amount": 200, "isCancerEvent": false, "availableStages": ["stage2","stage3","stage4"],
+      "stageAmounts": { "stage2": 150, "stage3": 200, "stage4": 300 } },
+
+    { "id": "ev_lck_08", "category": "lucky", "severity": "heavy",
+      "title": "不動産価値の大幅上昇",
+      "description": "保有不動産のエリアが再開発され、資産価値が大きく上昇した。",
+      "amount": 180, "isCancerEvent": false, "availableStages": ["stage3","stage4","stage5","stage6"],
+      "stageAmounts": { "stage3": 100, "stage4": 200, "stage5": 220, "stage6": 150 } }
+
+  ]
+}

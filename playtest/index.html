@@ -1,0 +1,2128 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>InsuLife — プレイテスト版</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', 'Meiryo', sans-serif; background: #0d0d1a; color: #dde; min-height: 100vh; font-size: 14px; }
+#app { max-width: 980px; margin: 0 auto; padding: 16px; }
+
+h1 { color: #e94560; font-size: 22px; text-align: center; margin-bottom: 16px; }
+h2 { color: #7ec8e3; font-size: 16px; margin-bottom: 10px; }
+h3 { color: #aad; font-size: 14px; margin-bottom: 8px; }
+
+.panel { background: #161630; border: 1px solid #2a2a50; border-radius: 8px; padding: 16px; margin-bottom: 14px; }
+.panel-title { font-weight: bold; color: #7ec8e3; margin-bottom: 10px; border-bottom: 1px solid #2a2a50; padding-bottom: 6px; }
+
+button { padding: 8px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: bold; transition: opacity 0.15s; }
+button:hover:not(:disabled) { opacity: 0.85; }
+button:disabled { opacity: 0.4; cursor: default; }
+.btn-primary  { background: #e94560; color: #fff; }
+.btn-confirm  { background: #27ae60; color: #fff; }
+.btn-action   { background: #2980b9; color: #fff; }
+.btn-warn     { background: #e67e22; color: #fff; }
+.btn-back     { background: #2a2a50; color: #aab; border: 1px solid #3a3a70; }
+.btn-sm       { padding: 4px 12px; font-size: 12px; }
+
+/* Grid layouts */
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+.flex-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+
+/* Setup */
+.lifestyle-card { border: 2px solid #2a2a50; border-radius: 8px; padding: 12px; cursor: pointer; transition: border-color 0.15s; }
+.lifestyle-card:hover { border-color: #7ec8e3; }
+.lifestyle-card.selected { border-color: #e94560; background: #1f1040; }
+.lifestyle-name { font-weight: bold; font-size: 15px; }
+.lifestyle-diff { color: #f39c12; font-size: 12px; margin: 4px 0; }
+.lifestyle-assets { color: #27ae60; font-size: 12px; }
+.lifestyle-desc { color: #99a; font-size: 12px; margin-top: 6px; }
+
+/* Goal cards */
+.goal-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; }
+.goal-card { border: 2px solid #2a2a50; border-radius: 6px; padding: 10px; cursor: pointer; transition: border-color 0.15s; }
+.goal-card:hover { border-color: #7ec8e3; }
+.goal-card.selected { border-color: #27ae60; background: #0a2018; }
+.goal-type { display: inline-block; font-size: 11px; font-weight: bold; padding: 1px 6px; border-radius: 3px; margin-bottom: 4px; }
+.goal-type-A { background: #1a4080; color: #7ec8e3; }
+.goal-type-B { background: #401a1a; color: #e94560; }
+.goal-type-C { background: #3a2010; color: #f39c12; }
+.goal-title-text { font-size: 13px; font-weight: bold; color: #dde; }
+.goal-cost { font-size: 11px; color: #f39c12; margin-top: 4px; }
+.goal-note { font-size: 11px; color: #778; margin-top: 4px; }
+.goal-cat { font-size: 11px; color: #56a; margin-top: 2px; }
+
+/* Insurance */
+.ins-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.ins-table th { background: #1f1f40; color: #7ec8e3; padding: 6px 8px; text-align: left; }
+.ins-table td { padding: 6px 8px; border-bottom: 1px solid #2a2a50; }
+.ins-table tr:hover td { background: #1a1a38; }
+.ins-table .enrolled td { background: #0a2018 !important; }
+.premium-up { color: #e67e22; }
+
+/* Turn / Event */
+.event-banner { border-radius: 8px; padding: 14px 18px; margin-bottom: 14px; }
+.event-banner .ev-cat { font-size: 12px; font-weight: bold; letter-spacing: 1px; }
+.event-banner .ev-title { font-size: 20px; font-weight: bold; margin: 4px 0; }
+.event-banner .ev-desc { font-size: 13px; color: #ccc; }
+.event-banner .ev-amount { font-size: 18px; font-weight: bold; margin-top: 8px; }
+
+.cat-medical    { background: #2a0a0a; border-left: 4px solid #e74c3c; }
+.cat-accident   { background: #2a1500; border-left: 4px solid #e67e22; }
+.cat-disability { background: #1a0a2a; border-left: 4px solid #8e44ad; }
+.cat-care       { background: #001a18; border-left: 4px solid #16a085; }
+.cat-asset      { background: #001020; border-left: 4px solid #2980b9; }
+.cat-lucky      { background: #1a1500; border-left: 4px solid #f39c12; }
+
+.results-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.results-table th { background: #1f1f40; color: #7ec8e3; padding: 6px 8px; text-align: right; }
+.results-table th:first-child { text-align: left; }
+.results-table td { padding: 6px 8px; border-bottom: 1px solid #2a2a50; text-align: right; }
+.results-table td:first-child { text-align: left; }
+.results-table .neg { color: #e94560; }
+.results-table .pos { color: #27ae60; }
+.results-table .neutral { color: #aaa; }
+
+.score-row { display: flex; align-items: center; gap: 16px; padding: 12px; border-radius: 6px; background: #161630; margin-bottom: 8px; }
+.score-rank { font-size: 24px; font-weight: bold; color: #f39c12; width: 32px; }
+.score-name { font-size: 16px; font-weight: bold; flex: 1; }
+.score-total { font-size: 24px; font-weight: bold; color: #e94560; }
+.score-detail { font-size: 12px; color: #889; }
+
+.badge-achieved { background: #27ae60; color: #fff; font-size: 11px; padding: 1px 6px; border-radius: 3px; }
+.badge-partial  { background: #e67e22; color: #fff; font-size: 11px; padding: 1px 6px; border-radius: 3px; }
+.badge-fail     { background: #555; color: #ccc; font-size: 11px; padding: 1px 6px; border-radius: 3px; }
+
+.stage-bar { display: flex; gap: 2px; margin-bottom: 14px; }
+.stage-pip { flex: 1; height: 6px; border-radius: 3px; background: #2a2a50; }
+.stage-pip.done { background: #27ae60; }
+.stage-pip.current { background: #e94560; }
+
+.info-row { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 10px; }
+.info-item { font-size: 13px; }
+.info-item span { color: #7ec8e3; font-weight: bold; }
+
+.tag { display: inline-block; font-size: 11px; padding: 1px 6px; border-radius: 3px; margin-right: 4px; }
+.tag-ins { background: #1a4080; color: #7ec8e3; }
+
+.player-col { min-width: 120px; }
+.sep { border: none; border-top: 1px solid #2a2a50; margin: 12px 0; }
+input[type=text] { background: #1a1a38; border: 1px solid #3a3a60; border-radius: 4px; color: #dde; padding: 6px 10px; font-size: 14px; width: 100%; }
+input[type=number] { background: #1a1a38; border: 1px solid #3a3a60; border-radius: 4px; color: #dde; padding: 6px 10px; font-size: 14px; width: 80px; }
+select { background: #1a1a38; border: 1px solid #3a3a60; border-radius: 4px; color: #dde; padding: 6px 10px; font-size: 14px; }
+label { font-size: 13px; color: #aab; }
+.err { color: #e94560; font-size: 13px; }
+.tip { color: #778; font-size: 12px; }
+
+/* ── Player Detail Modal ── */
+.modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:999; cursor:pointer; }
+.modal-panel {
+  position:fixed; top:0; right:0; width:360px; max-width:100vw; height:100dvh;
+  overflow-y:auto; background:#1a1a38; border-left:2px solid #3a3a70;
+  z-index:1000; padding:16px; box-shadow:-4px 0 24px rgba(0,0,0,0.5);
+}
+@media(max-width:480px){
+  .modal-panel {
+    width:100vw; top:auto; bottom:0; height:82dvh;
+    border-left:none; border-top:2px solid #3a3a70; border-radius:14px 14px 0 0;
+  }
+}
+.modal-section-title {
+  color:#7ec8e3; font-size:11px; font-weight:bold; letter-spacing:1px;
+  margin-bottom:6px; padding-bottom:4px; border-bottom:1px solid #2a2a50;
+}
+
+/* ── Expense Breakdown Accordion ── */
+.breakdown-header {
+  display:flex; justify-content:space-between; align-items:center;
+  padding:8px 12px; background:#1f1f40; border-radius:6px; cursor:pointer;
+  margin-top:6px; font-size:13px; user-select:none; border:1px solid #2a2a50;
+}
+.breakdown-header:hover { background:#282856; }
+.breakdown-body {
+  background:#0d0d20; border:1px solid #2a2a50; border-top:none;
+  border-radius:0 0 6px 6px; padding:10px 12px;
+}
+.breakdown-item {
+  display:flex; justify-content:space-between; align-items:center;
+  font-size:12px; padding:3px 0; border-bottom:1px dashed #1e1e40;
+}
+.breakdown-item:last-child { border-bottom:none; }
+.breakdown-sub { margin-left:14px; color:#99a; font-size:11px; }
+
+/* ── Player name as clickable button ── */
+.player-name-btn {
+  background:none; border:none; color:#dde; font-size:14px; cursor:pointer;
+  padding:0 4px 0 0; text-decoration:underline dotted; text-decoration-color:#3a3a70;
+  line-height:1.4;
+}
+.player-name-btn:hover { color:#7ec8e3; text-decoration-color:#7ec8e3; }
+.player-name-hint { font-size:10px; color:#556; vertical-align:middle; }
+
+/* ── Before-After Animation Overlay ── */
+@keyframes baFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+</style>
+</head>
+<body>
+<div id="app">読み込み中...</div>
+
+<!-- ===== EMBEDDED GAME DATA ===== -->
+<script>
+const LIFESTYLES_DATA = {
+  lifestyles: [
+    {
+      id: "steady", name: "堅実型", difficulty: 2, initialAssets: 100,
+      description: "安定志向・支出が少ない。リスクイベント発生率が低め。保険の基本を学ぶのに最適。",
+      keyInsurance: ["medical","personalPension"],
+      stageProbabilities: {
+        stage1: { medical:8,  accident:12, disability:10, care:0,  asset:8,  lucky:62 },
+        stage2: { medical:12, accident:13, disability:13, care:0,  asset:12, lucky:50 },
+        stage3: { medical:15, accident:10, disability:18, care:8,  asset:10, lucky:39 },
+        stage4: { medical:20, accident:7,  disability:15, care:18, asset:13, lucky:27 },
+        stage5: { medical:28, accident:3,  disability:0,  care:28, asset:18, lucky:23 },
+        stage6: { medical:33, accident:3,  disability:0,  care:28, asset:18, lucky:18 }
+      }
+    },
+    {
+      id: "family", name: "家族重視型", difficulty: 3, initialAssets: 50,
+      description: "子育て・介護を重視。介護・就労不能リスクが高め。バランス型。",
+      keyInsurance: ["accident","nursing","wholeLife"],
+      stageProbabilities: {
+        stage1: { medical:10, accident:18, disability:12, care:0,  asset:10, lucky:50 },
+        stage2: { medical:15, accident:18, disability:18, care:0,  asset:14, lucky:35 },
+        stage3: { medical:20, accident:12, disability:22, care:18, asset:13, lucky:15 },
+        stage4: { medical:22, accident:8,  disability:18, care:30, asset:14, lucky:8  },
+        stage5: { medical:33, accident:4,  disability:0,  care:40, asset:15, lucky:8  },
+        stage6: { medical:38, accident:3,  disability:0,  care:40, asset:15, lucky:4  }
+      }
+    },
+    {
+      id: "career", name: "キャリア重視型", difficulty: 4, initialAssets: 150,
+      description: "収入高め・仕事中心。就労不能・病気リスクが高く、ラッキーが少ない。",
+      keyInsurance: ["disability","accident","cancer"],
+      stageProbabilities: {
+        stage1: { medical:12, accident:15, disability:25, care:0,  asset:10, lucky:38 },
+        stage2: { medical:18, accident:15, disability:32, care:0,  asset:12, lucky:23 },
+        stage3: { medical:28, accident:10, disability:35, care:5,  asset:12, lucky:10 },
+        stage4: { medical:32, accident:8,  disability:30, care:15, asset:10, lucky:5  },
+        stage5: { medical:42, accident:5,  disability:0,  care:28, asset:18, lucky:7  },
+        stage6: { medical:48, accident:4,  disability:0,  care:28, asset:17, lucky:3  }
+      }
+    },
+    {
+      id: "challenge", name: "チャレンジ型", difficulty: 5, initialAssets: 0,
+      description: "変化を好む・リスクテイカー。資産変動リスクが最大。初期資産が少なく綱渡り。",
+      keyInsurance: ["medical","disability","variableAnnuity"],
+      stageProbabilities: {
+        stage1: { medical:10, accident:25, disability:10, care:0,  asset:20, lucky:35 },
+        stage2: { medical:13, accident:22, disability:15, care:0,  asset:28, lucky:22 },
+        stage3: { medical:18, accident:18, disability:18, care:8,  asset:25, lucky:13 },
+        stage4: { medical:22, accident:12, disability:18, care:15, asset:28, lucky:5  },
+        stage5: { medical:32, accident:5,  disability:0,  care:25, asset:30, lucky:8  },
+        stage6: { medical:35, accident:4,  disability:0,  care:25, asset:32, lucky:4  }
+      }
+    }
+  ]
+};
+
+const INSURANCE_DATA = {
+  insuranceTypes: [
+    {
+      id:"medical", name:"医療保険", baseMonthlyPremium:2000,
+      coverageCategories:["medical"], coverageCondition:null,
+      reductionRate:0.70, combinedReductionCap:0.90,
+      specialEffect:null, minEnrollmentStop:null, maxEnrollmentStop:null,
+      description:"病気・入院時の費用を70%軽減。入院給付金＋手術給付金。掛け捨て型で早期加入ほど割安。"
+    },
+    {
+      id:"cancer", name:"がん保険", baseMonthlyPremium:2000,
+      coverageCategories:["medical"], coverageCondition:"cancer_only",
+      reductionRate:0.80, combinedReductionCap:0.90,
+      specialEffect:null, minEnrollmentStop:null, maxEnrollmentStop:null,
+      description:"がんイベント限定で80%軽減。医療保険と併用で最大90%軽減。診断一時金＋治療給付。"
+    },
+    {
+      id:"disability", name:"就業不能保険", baseMonthlyPremium:4000,
+      coverageCategories:["disability"], coverageCondition:null,
+      reductionRate:0.75, combinedReductionCap:0.90,
+      specialEffect:null, minEnrollmentStop:null, maxEnrollmentStop:"childbirth",
+      description:"就労不能時の損失を75%軽減。子どもの誕生ストップまで加入可能。"
+    },
+    {
+      id:"accident", name:"傷害保険", baseMonthlyPremium:1500,
+      coverageCategories:["accident"], coverageCondition:null,
+      reductionRate:0.70, combinedReductionCap:0.90,
+      specialEffect:null, minEnrollmentStop:null, maxEnrollmentStop:null,
+      description:"事故・災害による損失を70%軽減。交通事故・自然災害など不慮の事故に備える。全ステージ加入可。"
+    },
+    {
+      id:"wholeLife", name:"終身保険", baseMonthlyPremium:10000,
+      coverageCategories:[], coverageCondition:null,
+      reductionRate:0, combinedReductionCap:0,
+      specialEffect:"deathBenefit",
+      minEnrollmentStop:null, maxEnrollmentStop:null,
+      deathBenefitByStop:{ gameStart:500, employment:400, marriage:300, childbirth:200, retirement:100, inheritance:50 },
+      description:"イベント軽減なし。ゲーム終了時に加入時期に応じた死亡保険金を資産に加算（18歳加入:+500万〜70歳加入:+50万）。"
+    },
+    {
+      id:"nursing", name:"介護保険（民間）", baseMonthlyPremium:6000,
+      coverageCategories:["care"], coverageCondition:null,
+      reductionRate:0.70, combinedReductionCap:0.90,
+      specialEffect:null, minEnrollmentStop:"marriage", maxEnrollmentStop:null,
+      description:"介護イベント時の損失を70%軽減。結婚ストップ以降から加入可能。"
+    },
+    {
+      id:"personalPension", name:"個人年金保険", baseMonthlyPremium:20000,
+      coverageCategories:[], coverageCondition:null,
+      reductionRate:0, combinedReductionCap:0,
+      specialEffect:"additionalRetirementIncome",
+      minEnrollmentStop:null, maxEnrollmentStop:"retirement",
+      additionalMonthlyIncome:50000,
+      // 【B1-2】給付額設計: 運用倍率はgameStart×2.0〜retirement×1.2。給付期間=264ヶ月(stage5+6)。
+      // 総支払: gameStart1008万/employment1094万/marriage1044万/childbirth1008万/retirement864万
+      // 総受取: gameStart2016万/employment1860万/marriage1557万/childbirth1310万/retirement1037万
+      // 純利益: gameStart+1008万/employment+766万/marriage+522万/childbirth+312万/retirement+165万
+      // ※全タイミングで元本超過。早期加入ほど絶対純利益が大きいトレードオフ設計。
+      pensionBonusByStop:{ gameStart:76000, employment:70000, marriage:59000, childbirth:50000, retirement:39000 },
+      description:"老後期以降のターン収入を増額。加入タイミングで受取額が変化（18歳:+7.6万/月〜定年:+3.9万/月）。早期加入ほど大きな複利効果。"
+    },
+    {
+      id:"variableAnnuity", name:"変額・外貨建て保険", baseMonthlyPremium:5000,
+      coverageCategories:["asset"], coverageCondition:null,
+      reductionRate:0.40, combinedReductionCap:0.40,
+      specialEffect:null, minEnrollmentStop:null, maxEnrollmentStop:null,
+      description:"資産変動イベントの損失を40%軽減。投資リスクを保険でヘッジする商品。"
+    }
+  ],
+  timingMultipliers: [
+    { stopId:"gameStart",   stopName:"ゲーム開始時",         ageGuide:"18歳", multiplier:1.0 },
+    { stopId:"employment",  stopName:"就職・社会人デビュー", ageGuide:"22歳", multiplier:1.2 },
+    { stopId:"marriage",    stopName:"結婚",                 ageGuide:"30歳", multiplier:1.5 },
+    { stopId:"childbirth",  stopName:"子どもの誕生",         ageGuide:"38歳", multiplier:2.0 },
+    { stopId:"retirement",  stopName:"定年退職・再雇用",     ageGuide:"60歳", multiplier:3.0 },
+    { stopId:"inheritance", stopName:"相続・資産整理",       ageGuide:"70歳", multiplier:4.0 }
+  ]
+};
+
+const GOALS_DATA = {
+  goalCards: [
+    { id:"goal_01", title:"子どもの教育を充実させたい",         category:"family",     type:"A", hasRecurringCost:true,  defaultMonthlySpend:50000, activeStages:["stage3"],                               requiredInsurance:[],                        requiredOptionalCost:"childbirth", achievementNote:"子育て期（stage3）の全ターンで教育費の支出を継続できること" },
+    { id:"goal_02", title:"住宅ローンを完済して家を守りたい",   category:"family",     type:"C", hasRecurringCost:true,  defaultMonthlySpend:50000, activeStages:["stage2","stage3","stage4"],             requiredInsurance:["disability","accident"], requiredOptionalCost:null, achievementNote:"自立期〜充実期の全ターンで住宅費の支出を継続し、就業不能保険または傷害保険が機能すること" },
+    { id:"goal_03", title:"介護で家族に迷惑をかけたくない",     category:"family",     type:"B", hasRecurringCost:false, defaultMonthlySpend:0,     activeStages:[],                                       requiredInsurance:["nursing"],               achievementNote:"介護イベント発生時に介護保険（民間）が適用されること" },
+    { id:"goal_04", title:"病気になっても最善の治療を受けたい", category:"health",     type:"B", hasRecurringCost:false, defaultMonthlySpend:0,     activeStages:[],                                       requiredInsurance:["medical","cancer"],      achievementNote:"病気・入院イベント発生時に医療保険またはがん保険が適用されること" },
+    { id:"goal_05", title:"健康寿命を延ばしたい",               category:"health",     type:"A", hasRecurringCost:true,  defaultMonthlySpend:15000, activeStages:["stage1","stage2","stage3","stage4","stage5","stage6"], requiredInsurance:[], achievementNote:"全ステージの全ターンで健康投資の支出を継続できること" },
+    { id:"goal_06", title:"最後まで自宅で暮らしたい",           category:"health",     type:"C", hasRecurringCost:true,  defaultMonthlySpend:20000, activeStages:["stage5","stage6"],                      requiredInsurance:["nursing"],               achievementNote:"老後期〜総括期の全ターンで在宅サポート費用の支出を継続し、介護保険が機能すること" },
+    { id:"goal_07", title:"好きな仕事を定年まで続けたい",       category:"career",     type:"B", hasRecurringCost:false, defaultMonthlySpend:0,     activeStages:[],                                       requiredInsurance:["disability"],            achievementNote:"就労不能イベント発生時に就業不能保険が適用されること" },
+    { id:"goal_08", title:"事故に遭っても生活を立て直したい",   category:"career",     type:"B", hasRecurringCost:false, defaultMonthlySpend:0,     activeStages:[],                                       requiredInsurance:["accident"],              achievementNote:"事故・災害イベント発生時に傷害保険が適用されること" },
+    { id:"goal_09", title:"定年後もやりがいある仕事を続けたい", category:"career",     type:"A", hasRecurringCost:true,  defaultMonthlySpend:20000, activeStages:["stage5"],                               requiredInsurance:[],                        requiredOptionalCost:"retirement", achievementNote:"老後期（stage5）の全ターンでセカンドキャリアへの支出を継続できること" },
+    { id:"goal_10", title:"老後の生活水準を落としたくない",     category:"retirement", type:"A", hasRecurringCost:true,  defaultMonthlySpend:30000, activeStages:["stage5","stage6"],                      requiredInsurance:[],                        requiredOptionalCost:"retirement", achievementNote:"老後期〜総括期の全ターンで生活費の支出を継続できること" },
+    { id:"goal_11", title:"老後資産づくりを今から始めたい",     category:"retirement", type:"A", hasRecurringCost:true,  defaultMonthlySpend:30000, activeStages:["stage2","stage3","stage4"],             requiredInsurance:[],                        achievementNote:"自立期〜充実期の全ターンで積立・資産形成の支出を継続できること" },
+    { id:"goal_12", title:"大切な人に資産を遺したい",           category:"retirement", type:"B", hasRecurringCost:false, defaultMonthlySpend:0,     activeStages:[],                                       requiredInsurance:["wholeLife"],             requiredOptionalCost:"inheritance", achievementNote:"終身保険に加入したまま相続・資産整理ストップを迎えること" }
+  ],
+  spendingAdjustmentRange: { minRate:0.5, maxRate:2.0 },
+  achievementLevels: {
+    achieved:        { label:"達成",     scoreWeight:1.0 },
+    partialAchieved: { label:"一部達成", scoreWeight:0.5 },
+    notAchieved:     { label:"未達成",   scoreWeight:0.0 }
+  }
+};
+
+const STAGES_DATA = {
+  stages: [
+    { id:"stage1", name:"青春期",   ageRange:"18〜21歳", turns:2, yearsPerTurn:2, monthlyIncome:160000, annualBasicExpense:165, mandatoryStopBefore:{ stopId:"gameStart",   stopName:"ゲーム開始",         optionalCost:null } },
+    { id:"stage2", name:"自立期",   ageRange:"22〜30歳", turns:3, yearsPerTurn:3, monthlyIncome:250000, annualBasicExpense:220, mandatoryStopBefore:{ stopId:"employment",  stopName:"就職・社会人デビュー", optionalCost:null } },
+    { id:"stage3", name:"子育て期", ageRange:"31〜38歳", turns:4, yearsPerTurn:2, monthlyIncome:350000, annualBasicExpense:260, mandatoryStopBefore:{ stopId:"marriage",    stopName:"結婚",               optionalCost:{ amount:300, label:"結婚式・披露宴・新婚旅行" } } },
+    { id:"stage4", name:"充実期",   ageRange:"39〜59歳", turns:7, yearsPerTurn:3, monthlyIncome:450000, annualBasicExpense:370, mandatoryStopBefore:{ stopId:"childbirth",  stopName:"子どもの誕生",       optionalCost:{ amount:100, label:"出産費用・育児準備・ベビー用品" } } },
+    { id:"stage5", name:"老後期",   ageRange:"60〜71歳", turns:4, yearsPerTurn:3, monthlyIncome:200000, annualBasicExpense:200, mandatoryStopBefore:{ stopId:"retirement",  stopName:"定年退職・再雇用",   optionalCost:{ amount:100, label:"退職後のライフスタイル整備・趣味の初期費用" } } },
+    { id:"stage6", name:"総括期",   ageRange:"72〜81歳", turns:2, yearsPerTurn:5, monthlyIncome:150000, annualBasicExpense:155, mandatoryStopBefore:{ stopId:"inheritance", stopName:"相続・資産整理",     optionalCost:{ amount:150, label:"葬儀・お墓・相続手続き・家財整理" } } }
+  ]
+};
+
+const EVENTS_DATA = {
+  eventCategories: {
+    medical:    { name:"病気・入院",   color:"#e74c3c" },
+    accident:   { name:"事故・災害",   color:"#e67e22" },
+    disability: { name:"就労不能",     color:"#8e44ad" },
+    care:       { name:"介護",         color:"#16a085" },
+    asset:      { name:"資産変動",     color:"#2980b9" },
+    lucky:      { name:"ラッキー",     color:"#f39c12" }
+  },
+  events: [
+    // ── 病気・入院 ──────────────────────────────────────
+    { id:"ev_med_01", category:"medical", severity:"light",
+      title:"風邪・インフルエンザ",
+      description:"高熱が続き、数日の通院と市販薬・医療費の費用がかさんだ。仕事を休んだ分の影響も。",
+      amount:-20, isCancerEvent:false, availableStages:null,
+      stageAmounts:{ stage5:-25, stage6:-30 } },
+
+    { id:"ev_med_02", category:"medical", severity:"light",
+      title:"歯科治療",
+      description:"奥歯の虫歯が進行し、インプラントや詰め物を含む治療が必要になった。",
+      amount:-35, isCancerEvent:false, availableStages:null,
+      stageAmounts:null },
+
+    { id:"ev_med_03", category:"medical", severity:"light",
+      title:"アレルギー・皮膚疾患",
+      description:"慢性アレルギーが悪化し、定期通院と薬代が継続的に発生した。",
+      amount:-20, isCancerEvent:false, availableStages:null,
+      stageAmounts:{ stage5:-25, stage6:-30 } },
+
+    { id:"ev_med_04", category:"medical", severity:"medium",
+      title:"盲腸・短期入院",
+      description:"急性虫垂炎で緊急入院・手術。1週間の入院と療養期間が発生した。",
+      amount:-80, isCancerEvent:false, availableStages:["stage1","stage2","stage3","stage4","stage5"],
+      stageAmounts:{ stage1:-60, stage5:-100 } },
+
+    { id:"ev_med_05", category:"medical", severity:"medium",
+      title:"骨折・外科手術",
+      description:"転倒による骨折で手術が必要になり、リハビリ期間を含め長引いた。",
+      amount:-100, isCancerEvent:false, availableStages:null,
+      stageAmounts:{ stage1:-60, stage2:-80, stage5:-150, stage6:-180 } },
+
+    { id:"ev_med_06", category:"medical", severity:"medium",
+      title:"糖尿病・生活習慣病",
+      description:"検査で糖尿病と診断。定期通院と薬代、食事管理にかかる費用が続く。",
+      amount:-90, isCancerEvent:false, availableStages:["stage2","stage3","stage4","stage5","stage6"],
+      stageAmounts:{ stage2:-60, stage3:-80, stage5:-120, stage6:-140 } },
+
+    { id:"ev_med_07", category:"medical", severity:"heavy",
+      title:"がん（悪性腫瘍）",
+      description:"がんが発見され、手術・抗がん剤・放射線治療を受けた。先進医療を含む治療費が長期にわたる。",
+      amount:-500, isCancerEvent:true, availableStages:["stage2","stage3","stage4","stage5","stage6"],
+      stageAmounts:{ stage2:-400, stage3:-450, stage5:-550, stage6:-600 } },
+
+    { id:"ev_med_08", category:"medical", severity:"heavy",
+      title:"心疾患・長期入院",
+      description:"心筋梗塞で緊急搬送。ICU入室・手術・長期リハビリで高額な医療費が発生した。",
+      amount:-280, isCancerEvent:false, availableStages:["stage3","stage4","stage5","stage6"],
+      stageAmounts:{ stage3:-220, stage5:-310, stage6:-360 } },
+
+    { id:"ev_med_09", category:"medical", severity:"heavy",
+      title:"脳卒中・高度先進医療",
+      description:"脳梗塞で倒れ、最新治療とリハビリを選択。高度先進医療費と長期リハビリ施設費が自己負担となった。",
+      amount:-550, isCancerEvent:false, availableStages:["stage4","stage5","stage6"],
+      stageAmounts:{ stage5:-580, stage6:-650 } },
+
+    // ── 事故・災害 ──────────────────────────────────────
+    { id:"ev_acc_01", category:"accident", severity:"light",
+      title:"自転車・バイク事故",
+      description:"自転車で転倒し、相手への賠償と自身の治療費が発生した。",
+      amount:-35, isCancerEvent:false, availableStages:["stage1","stage2","stage3","stage4"],
+      stageAmounts:{ stage1:-25, stage2:-30 } },
+
+    { id:"ev_acc_02", category:"accident", severity:"light",
+      title:"家電・設備の故障",
+      description:"給湯器や冷蔵庫が突然故障し、緊急交換費用が必要になった。",
+      amount:-30, isCancerEvent:false, availableStages:["stage2","stage3","stage4","stage5","stage6"],
+      stageAmounts:null },
+
+    { id:"ev_acc_03", category:"accident", severity:"medium",
+      title:"交通事故（被害）",
+      description:"追突事故に遭い、むち打ちで数ヶ月の通院と休業損害が発生した。",
+      amount:-120, isCancerEvent:false, availableStages:null,
+      stageAmounts:{ stage1:-70, stage2:-90, stage5:-130, stage6:-130 } },
+
+    { id:"ev_acc_04", category:"accident", severity:"medium",
+      title:"水害・台風被害",
+      description:"大型台風で自宅・賃貸物件が浸水し、修繕費と家財の買い替えが必要になった。",
+      amount:-150, isCancerEvent:false, availableStages:["stage2","stage3","stage4","stage5","stage6"],
+      stageAmounts:null },
+
+    { id:"ev_acc_05", category:"accident", severity:"heavy",
+      title:"重大交通事故",
+      description:"重大な交通事故で長期入院・リハビリが必要となり、高額の治療費が発生した。",
+      amount:-300, isCancerEvent:false, availableStages:null,
+      stageAmounts:{ stage1:-180, stage2:-240, stage5:-320, stage6:-320 } },
+
+    { id:"ev_acc_06", category:"accident", severity:"heavy",
+      title:"火災・全壊災害",
+      description:"火災により自宅が全焼。仮住まいの費用と再建・引越しコストが重くのしかかった。",
+      amount:-400, isCancerEvent:false, availableStages:["stage2","stage3","stage4","stage5","stage6"],
+      stageAmounts:null },
+
+    // ── 就労不能 ────────────────────────────────────────
+    { id:"ev_dis_01", category:"disability", severity:"light",
+      title:"精神的疲弊・短期休職",
+      description:"過重労働とストレスで適応障害を発症し、3ヶ月の休職が必要になった。",
+      amount:-80, isCancerEvent:false, availableStages:["stage2","stage3","stage4"],
+      stageAmounts:{ stage2:-60, stage3:-80, stage4:-100 } },
+
+    { id:"ev_dis_02", category:"disability", severity:"light",
+      title:"腰痛・ヘルニア",
+      description:"ヘルニアが悪化し、デスクワークや立ち仕事が困難に。一時的に収入が減少した。",
+      amount:-70, isCancerEvent:false, availableStages:["stage2","stage3","stage4","stage5"],
+      stageAmounts:{ stage2:-50, stage3:-70, stage4:-90, stage5:-60 } },
+
+    { id:"ev_dis_03", category:"disability", severity:"medium",
+      title:"うつ病・中期休職",
+      description:"うつ病と診断され、6ヶ月の休職。傷病手当だけでは生活費が不足した。",
+      amount:-180, isCancerEvent:false, availableStages:["stage2","stage3","stage4"],
+      stageAmounts:{ stage2:-120, stage3:-160, stage4:-210 } },
+
+    { id:"ev_dis_04", category:"disability", severity:"medium",
+      title:"事故による長期療養",
+      description:"事故で重傷を負い、半年以上の療養を余儀なくされた。収入が大きく落ち込んだ。",
+      amount:-200, isCancerEvent:false, availableStages:["stage1","stage2","stage3","stage4","stage5"],
+      stageAmounts:{ stage1:-100, stage2:-150, stage3:-200, stage4:-250, stage5:-150 } },
+
+    { id:"ev_dis_05", category:"disability", severity:"heavy",
+      title:"重篤疾患による長期就労不能",
+      description:"重い病気で1年以上働けなくなり、収入がほぼ途絶えた。医療費と生活費の両方が貯蓄を圧迫した。",
+      amount:-600, isCancerEvent:false, availableStages:["stage2","stage3","stage4"],
+      stageAmounts:{ stage2:-400, stage3:-520, stage4:-650 } },
+
+    { id:"ev_dis_06", category:"disability", severity:"heavy",
+      title:"障害認定・就労困難",
+      description:"事故や病気により障害が残り、以前と同様の就労が困難になった。住環境の改修も必要に。",
+      amount:-400, isCancerEvent:false, availableStages:["stage2","stage3","stage4","stage5"],
+      stageAmounts:{ stage2:-300, stage3:-380, stage4:-450, stage5:-200 } },
+
+    // ── 介護 ────────────────────────────────────────────
+    { id:"ev_care_01", category:"care", severity:"light",
+      title:"親の軽度介護",
+      description:"親が要介護1と認定。週数回のヘルパー利用と交通費・見守り費用が発生した。",
+      amount:-60, isCancerEvent:false, availableStages:["stage3","stage4","stage5","stage6"],
+      stageAmounts:{ stage5:-80, stage6:-100 } },
+
+    { id:"ev_care_02", category:"care", severity:"light",
+      title:"配偶者の通院サポート",
+      description:"配偶者が足腰の衰えで定期通院が必要になり、付き添いと費用負担が続く。",
+      amount:-50, isCancerEvent:false, availableStages:["stage4","stage5","stage6"],
+      stageAmounts:{ stage5:-70, stage6:-90 } },
+
+    { id:"ev_care_03", category:"care", severity:"medium",
+      title:"親の中度介護・施設検討",
+      description:"親が要介護3に。グループホームへの入居を検討し、初期費用と月額費用が発生した。",
+      amount:-180, isCancerEvent:false, availableStages:["stage3","stage4","stage5"],
+      stageAmounts:{ stage3:-150, stage4:-180, stage5:-200 } },
+
+    { id:"ev_care_04", category:"care", severity:"medium",
+      title:"自身の介護予防・リハビリ",
+      description:"転倒による骨折後、介護予防リハビリが必要になった。通所費用が継続的にかかる。",
+      amount:-150, isCancerEvent:false, availableStages:["stage5","stage6"],
+      stageAmounts:{ stage6:-180 } },
+
+    { id:"ev_care_05", category:"care", severity:"heavy",
+      title:"重度介護・特別養護老人ホーム入所",
+      description:"要介護5となり特別養護老人ホームへ入所。入居一時金と複数年分の月額費用が一括で発生した。",
+      amount:-600, isCancerEvent:false, availableStages:["stage4","stage5","stage6"],
+      stageAmounts:{ stage4:-500, stage5:-600, stage6:-650 } },
+
+    { id:"ev_care_06", category:"care", severity:"heavy",
+      title:"認知症・長期施設入所",
+      description:"認知症が進行し、専門施設への長期入所が必要になった。費用は長期にわたって重い。",
+      amount:-350, isCancerEvent:false, availableStages:["stage5","stage6"],
+      stageAmounts:{ stage6:-400 } },
+
+    // ── 資産変動 ────────────────────────────────────────
+    { id:"ev_ast_01", category:"asset", severity:"light",
+      title:"株価下落・小損失",
+      description:"保有株が急落。売却タイミングを逃し、含み損が実損に変わった。",
+      amount:-50, isCancerEvent:false, availableStages:["stage2","stage3","stage4","stage5","stage6"],
+      stageAmounts:{ stage2:-30, stage3:-50, stage4:-80, stage5:-60, stage6:-40 } },
+
+    { id:"ev_ast_02", category:"asset", severity:"light",
+      title:"予期せぬ出費",
+      description:"冠婚葬祭が重なり、また急な修繕費なども重なって予想外の支出が続いた。",
+      amount:-40, isCancerEvent:false, availableStages:null,
+      stageAmounts:{ stage1:-20, stage2:-30, stage3:-40, stage4:-50, stage5:-40, stage6:-30 } },
+
+    { id:"ev_ast_03", category:"asset", severity:"medium",
+      title:"投資失敗・中程度の損失",
+      description:"FXや仮想通貨への投資が裏目に出て、まとまった損失が発生した。",
+      amount:-150, isCancerEvent:false, availableStages:["stage2","stage3","stage4","stage5","stage6"],
+      stageAmounts:{ stage2:-80, stage3:-150, stage4:-250, stage5:-200, stage6:-120 } },
+
+    { id:"ev_ast_04", category:"asset", severity:"medium",
+      title:"リストラ・収入減",
+      description:"会社の経営悪化でリストラに遭い、数ヶ月間の収入が途絶えた。",
+      amount:-130, isCancerEvent:false, availableStages:["stage2","stage3","stage4"],
+      stageAmounts:{ stage2:-100, stage3:-150, stage4:-200 } },
+
+    { id:"ev_ast_05", category:"asset", severity:"heavy",
+      title:"事業失敗・大幅損失",
+      description:"副業・起業が失敗し、投じた資金のほぼ全額を失った。",
+      amount:-350, isCancerEvent:false, availableStages:["stage2","stage3","stage4","stage5"],
+      stageAmounts:{ stage2:-150, stage3:-280, stage4:-400, stage5:-200 } },
+
+    { id:"ev_ast_06", category:"asset", severity:"heavy",
+      title:"詐欺・大規模資産流出",
+      description:"投資詐欺や不正アクセスに遭い、まとまった資産を失ってしまった。",
+      amount:-300, isCancerEvent:false, availableStages:null,
+      stageAmounts:{ stage1:-50, stage2:-100, stage3:-200, stage4:-300, stage5:-380, stage6:-380 } },
+
+    // ── ラッキー ────────────────────────────────────────
+    { id:"ev_lck_01", category:"lucky", severity:"light",
+      title:"節税・還付金",
+      description:"確定申告の見直しで税金の還付金が戻ってきた。ふるさと納税も活用した。",
+      amount:30, isCancerEvent:false, availableStages:["stage2","stage3","stage4","stage5","stage6"],
+      stageAmounts:{ stage2:20, stage3:30, stage4:50, stage5:35, stage6:20 } },
+
+    { id:"ev_lck_02", category:"lucky", severity:"light",
+      title:"副業・スモールビジネス収入",
+      description:"スキルを活かした副業が軌道に乗り、コンスタントな収入が得られた。",
+      amount:40, isCancerEvent:false, availableStages:["stage2","stage3","stage4","stage5"],
+      stageAmounts:{ stage2:30, stage3:50, stage4:70, stage5:40 } },
+
+    { id:"ev_lck_03", category:"lucky", severity:"light",
+      title:"生活費の節約成功",
+      description:"固定費の見直しと節約習慣が実を結び、年間支出を大幅に削減できた。",
+      amount:35, isCancerEvent:false, availableStages:null,
+      stageAmounts:{ stage1:20, stage2:30, stage3:40, stage4:50, stage5:35, stage6:25 } },
+
+    { id:"ev_lck_04", category:"lucky", severity:"medium",
+      title:"昇進・昇給",
+      description:"実績が認められ、大幅な昇給と役職手当が加わった。",
+      amount:80, isCancerEvent:false, availableStages:["stage2","stage3","stage4"],
+      stageAmounts:{ stage2:60, stage3:90, stage4:130 } },
+
+    { id:"ev_lck_05", category:"lucky", severity:"medium",
+      title:"投資利益・配当収入",
+      description:"長期保有の株式が大きく値上がりし、売却益や配当を得た。",
+      amount:100, isCancerEvent:false, availableStages:["stage2","stage3","stage4","stage5","stage6"],
+      stageAmounts:{ stage2:60, stage3:100, stage4:150, stage5:120, stage6:80 } },
+
+    { id:"ev_lck_06", category:"lucky", severity:"medium",
+      title:"相続・贈与",
+      description:"親族からの贈与があり、まとまった資産が手に入った。",
+      amount:120, isCancerEvent:false, availableStages:["stage3","stage4","stage5","stage6"],
+      stageAmounts:{ stage3:100, stage4:150, stage5:200, stage6:150 } },
+
+    { id:"ev_lck_07", category:"lucky", severity:"heavy",
+      title:"事業大成功・売却益",
+      description:"立ち上げた事業が買収オファーを受け、大きなキャピタルゲインを得た。",
+      amount:200, isCancerEvent:false, availableStages:["stage2","stage3","stage4"],
+      stageAmounts:{ stage2:150, stage3:200, stage4:300 } },
+
+    { id:"ev_lck_08", category:"lucky", severity:"heavy",
+      title:"不動産価値の大幅上昇",
+      description:"保有不動産のエリアが再開発され、資産価値が大きく上昇した。",
+      amount:180, isCancerEvent:false, availableStages:["stage3","stage4","stage5","stage6"],
+      stageAmounts:{ stage3:100, stage4:200, stage5:220, stage6:150 } },
+
+    // ── 保険給付イベント（加入者のみ給付） ──────────────────────
+    { id:"ev_lck_ins_01", category:"lucky", severity:"heavy",
+      title:"がん保険 診断一時金給付",
+      description:"がんの早期発見により診断一時金が給付された。【がん保険加入者のみ給付】",
+      amount:200, isCancerEvent:false,
+      availableStages:["stage2","stage3","stage4","stage5","stage6"],
+      stageAmounts:null,
+      insuranceBenefit:"cancer" },
+
+    { id:"ev_lck_ins_02", category:"lucky", severity:"light",
+      title:"医療保険 入院給付金",
+      description:"検診で異常が見つかり短期入院。医療保険の入院給付金が支給された。【医療保険加入者のみ給付】",
+      amount:60, isCancerEvent:false,
+      availableStages:null,
+      stageAmounts:{ stage1:30, stage2:50, stage3:60, stage4:70, stage5:80, stage6:80 },
+      insuranceBenefit:"medical" },
+
+    { id:"ev_lck_ins_03", category:"lucky", severity:"medium",
+      title:"就業不能保険 給付金",
+      description:"体調不良で一時的に就労が困難になったが、就業不能保険の給付金でカバーできた。【就業不能保険加入者のみ給付】",
+      amount:120, isCancerEvent:false,
+      availableStages:["stage2","stage3","stage4"],
+      stageAmounts:{ stage2:100, stage3:120, stage4:150 },
+      insuranceBenefit:"disability" },
+
+    { id:"ev_lck_ins_04", category:"lucky", severity:"medium",
+      title:"介護保険 給付金",
+      description:"家族の介護認定に際し、民間介護保険の一時金が給付された。介護費用の一部を補填できた。【介護保険加入者のみ給付】",
+      amount:100, isCancerEvent:false,
+      availableStages:["stage4","stage5","stage6"],
+      stageAmounts:{ stage4:100, stage5:120, stage6:120 },
+      insuranceBenefit:"nursing" }
+  ]
+};
+
+const CATEGORY_NAMES = {
+  family:"家族", health:"健康", career:"仕事", retirement:"老後"
+};
+</script>
+
+<!-- ===== GAME ENGINE (inline copy with fixes applied) ===== -->
+<script>
+"use strict";
+// ─── initGame ───
+function initGame({ lifestyleId, playerIds, lifestylesData, stagesData }) {
+  const lifestyle = lifestylesData.lifestyles.find(l => l.id === lifestyleId);
+  if (!lifestyle) throw new Error("ライフスタイルが見つかりません: " + lifestyleId);
+  const players = playerIds.map(id => ({
+    id, assets: lifestyle.initialAssets, insurances: [], goals: [],
+    turnHistory: [], goalMissedEvents: [], paidOptionalCosts: []
+  }));
+  return { lifestyle, players, currentStageIndex: 0, currentTurnInStage: 0, globalTurn: 0, phase: "mandatoryStop", log: [] };
+}
+
+// ─── setPlayerGoals ───
+function setPlayerGoals(player, goalSelections, goalsData) {
+  if (goalSelections.length < 2) throw new Error("目的カードは最低2枚選択してください。");
+  player.goals = goalSelections.map(sel => {
+    const goal = goalsData.goalCards.find(g => g.id === sel.goalId);
+    if (!goal) throw new Error("目的カードが見つかりません: " + sel.goalId);
+    return { goalId: sel.goalId, monthlySpend: sel.monthlySpend ?? goal.defaultMonthlySpend };
+  });
+}
+
+// ─── reviewInsurance ───
+function reviewInsurance(player, insuranceIdsToAdd, insuranceIdsToCancle, stopId, insuranceData, stagesData) {
+  player.insurances = player.insurances.filter(i => !insuranceIdsToCancle.includes(i.insuranceId));
+  const multiplierEntry = insuranceData.timingMultipliers.find(t => t.stopId === stopId);
+  if (!multiplierEntry) throw new Error("タイミング乗数が見つかりません: " + stopId);
+  const multiplier = multiplierEntry.multiplier;
+  for (const insId of insuranceIdsToAdd) {
+    if (player.insurances.some(i => i.insuranceId === insId)) continue;
+    const ins = insuranceData.insuranceTypes.find(i => i.id === insId);
+    if (!ins) throw new Error("保険が見つかりません: " + insId);
+    if (ins.minEnrollmentStop) {
+      const minStop = insuranceData.timingMultipliers.find(t => t.stopId === ins.minEnrollmentStop);
+      if (minStop && multiplierEntry.multiplier < minStop.multiplier)
+        throw new Error(ins.name + "は" + minStop.stopName + "以降から加入できます。");
+    }
+    if (ins.maxEnrollmentStop) {
+      const maxStop = insuranceData.timingMultipliers.find(t => t.stopId === ins.maxEnrollmentStop);
+      if (maxStop && multiplierEntry.multiplier > maxStop.multiplier)
+        throw new Error(ins.name + "はこのタイミングでは加入できません。");
+    }
+    const monthlyPremium = Math.round(ins.baseMonthlyPremium * multiplier);
+    const record = { insuranceId: insId, monthlyPremium, enrolledAtStop: stopId };
+    if (insId === "personalPension" && ins.pensionBonusByStop)
+      record.additionalMonthlyIncome = ins.pensionBonusByStop[stopId] ?? ins.additionalMonthlyIncome ?? 0;
+    if (insId === "wholeLife" && ins.deathBenefitByStop)
+      record.deathBenefit = ins.deathBenefitByStop[stopId] ?? 0;
+    player.insurances.push(record);
+  }
+}
+
+// ─── completeMandatoryStop ───
+function completeMandatoryStop(gameState) { gameState.phase = "turn"; }
+
+// ─── rollEventCategory ───
+function rollEventCategory(lifestyle, stageId, rng) {
+  rng = rng || Math.random;
+  const probs = lifestyle.stageProbabilities[stageId];
+  const roll = rng() * 100;
+  let cum = 0;
+  for (const cat of ["medical","accident","disability","care","asset","lucky"]) {
+    cum += probs[cat] || 0;
+    if (roll < cum) return cat;
+  }
+  return "lucky";
+}
+
+// ─── drawEventCard ───
+function drawEventCard(category, stageId, eventsData, rng) {
+  rng = rng || Math.random;
+  const weights = { light:3, medium:2, heavy:1 };
+  let candidates = eventsData.events.filter(ev =>
+    ev.category === category && (ev.availableStages === null || ev.availableStages.includes(stageId))
+  );
+  if (candidates.length === 0) candidates = eventsData.events.filter(ev => ev.category === category);
+  const pool = candidates.flatMap(ev => Array(weights[ev.severity] || 1).fill(ev));
+  return pool[Math.floor(rng() * pool.length)];
+}
+
+// ─── income / expenses ───
+// ─── calculateAnnualIncome ───
+function calculateAnnualIncome(player, stage, insuranceData) {
+  let monthly = stage.monthlyIncome;
+  const pensionRecord = player.insurances.find(i => i.insuranceId === "personalPension");
+  if (pensionRecord && ["stage5","stage6"].includes(stage.id))
+    monthly += pensionRecord.additionalMonthlyIncome ?? 0;
+  return (monthly * 12) / 10000;
+}
+function calculateAnnualBasicExpense(stage) {
+  return stage.annualBasicExpense || 0; // 万円/年
+}
+function calculateAnnualPremium(player) {
+  return (player.insurances.reduce((s, i) => s + i.monthlyPremium, 0) * 12) / 10000; // 万円/年
+}
+function calculateAnnualGoalSpend(player, stageId, goalsData) {
+  let monthly = 0;
+  for (const pg of player.goals) {
+    const goal = goalsData.goalCards.find(g => g.id === pg.goalId);
+    if (goal && goal.hasRecurringCost && goal.activeStages.includes(stageId)) monthly += pg.monthlySpend;
+  }
+  return (monthly * 12) / 10000; // 万円/年
+}
+function payOptionalCost(player, amount) {
+  player.assets = Math.round((player.assets - amount) * 10) / 10;
+}
+
+// ─── applyInsuranceToEvent ───
+function applyInsuranceToEvent(baseDamage, category, isCancer, player, insuranceData) {
+  const applicable = player.insurances
+    .map(pi => insuranceData.insuranceTypes.find(i => i.id === pi.insuranceId))
+    .filter(ins => {
+      if (!ins || !ins.coverageCategories.includes(category)) return false;
+      if (ins.coverageCondition === "cancer_only" && !isCancer) return false;
+      return true;
+    });
+  if (applicable.length === 0) return { baseDamage, actualDamage: baseDamage, insurancePayout: 0, totalReductionRate: 0, appliedInsurances: [] };
+  const cap = Math.max(...applicable.map(i => i.combinedReductionCap));
+  const rate = Math.min(applicable.reduce((s, i) => s + i.reductionRate, 0), cap);
+  const actualDamage = Math.round(baseDamage * (1 - rate));
+  return {
+    baseDamage,
+    actualDamage,
+    insurancePayout: baseDamage - actualDamage,
+    totalReductionRate: rate,
+    appliedInsurances: applicable.map(i => i.name)
+  };
+}
+
+// ─── getEventAmount ───
+function getEventAmount(eventCard, stageId) {
+  if (eventCard.stageAmounts && eventCard.stageAmounts[stageId] !== undefined) {
+    return eventCard.stageAmounts[stageId];
+  }
+  return eventCard.amount;
+}
+
+// ─── processTurn ───
+function processTurn(gameState, stagesData, eventsData, goalsData, insuranceData, rng) {
+  rng = rng || Math.random;
+  const stage = stagesData.stages[gameState.currentStageIndex];
+  const years = stage.yearsPerTurn || 1;
+  const category = rollEventCategory(gameState.lifestyle, stage.id, rng);
+  const eventCard = drawEventCard(category, stage.id, eventsData, rng);
+
+  const playerResults = gameState.players.map(player => {
+    const annualIncome      = calculateAnnualIncome(player, stage, insuranceData);
+    const annualBasicExpense = calculateAnnualBasicExpense(stage);
+    const annualPremium     = calculateAnnualPremium(player);
+    const annualGoalSpend   = calculateAnnualGoalSpend(player, stage.id, goalsData);
+    const income      = annualIncome      * years;
+    const basicExpense = annualBasicExpense * years;
+    const premium     = annualPremium     * years;
+    const goalSpend   = annualGoalSpend   * years;
+    const effectiveAmount = getEventAmount(eventCard, stage.id);
+    let eventDamage = 0, eventBaseDamage = 0, insurancePayout = 0, reductionRate = 0, appliedIns = [];
+    if (effectiveAmount < 0) {
+      const r = applyInsuranceToEvent(Math.abs(effectiveAmount), category, eventCard.isCancerEvent, player, insuranceData);
+      eventDamage = r.actualDamage; eventBaseDamage = r.baseDamage;
+      insurancePayout = r.insurancePayout; reductionRate = r.totalReductionRate; appliedIns = r.appliedInsurances;
+    }
+    // 保険連動給付イベント: 該当保険加入者のみ給付
+    let eventGain = 0;
+    if (effectiveAmount > 0) {
+      if (eventCard.insuranceBenefit) {
+        eventGain = player.insurances.some(pi => pi.insuranceId === eventCard.insuranceBenefit)
+          ? effectiveAmount : 0;
+      } else {
+        eventGain = effectiveAmount;
+      }
+    }
+    const netChange = income - basicExpense - premium - goalSpend - eventDamage + eventGain;
+    player.assets = Math.round((player.assets + netChange) * 10) / 10;
+
+    // B/C型目的カードのイベント被弾チェック
+    if (effectiveAmount < 0) {
+      player.goals.forEach(pg => {
+        const goal = goalsData.goalCards.find(g => g.id === pg.goalId);
+        if (!goal || goal.requiredInsurance.length === 0) return;
+        if (pg.goalId === 'goal_12') return; // 終身保険はゲーム終了時判定
+        // このイベントカテゴリが目的カードの必要保険の対象か確認
+        const relevant = goal.requiredInsurance.some(rid => {
+          const ins = insuranceData.insuranceTypes.find(i => i.id === rid);
+          if (!ins) return false;
+          if (!ins.coverageCategories.includes(category)) return false;
+          if (ins.coverageCondition === 'cancer_only' && !eventCard.isCancerEvent) return false;
+          return true;
+        });
+        if (!relevant) return;
+        // 必要保険に未加入 → 被弾記録
+        const covered = goal.requiredInsurance.some(rid =>
+          player.insurances.some(pi => {
+            if (pi.insuranceId !== rid) return false;
+            const ins = insuranceData.insuranceTypes.find(i => i.id === rid);
+            if (!ins || !ins.coverageCategories.includes(category)) return false;
+            if (ins.coverageCondition === 'cancer_only' && !eventCard.isCancerEvent) return false;
+            return true;
+          })
+        );
+        if (!covered && !player.goalMissedEvents.includes(pg.goalId)) {
+          player.goalMissedEvents.push(pg.goalId);
+        }
+      });
+    }
+
+    const record = { turn: gameState.globalTurn+1, stageId: stage.id, years,
+      annualIncome, annualBasicExpense, annualPremium, annualGoalSpend,
+      income, basicExpense, premium, goalSpend,
+      eventCard, eventBaseDamage, eventDamage, insurancePayout, reductionRate, appliedIns, eventGain, netChange, assetsAfter: player.assets };
+    player.turnHistory.push(record);
+    return { playerId: player.id, ...record };
+  });
+
+  gameState.globalTurn++;
+  gameState.currentTurnInStage++;
+  if (gameState.currentTurnInStage >= stage.turns) {
+    const next = gameState.currentStageIndex + 1;
+    if (next >= stagesData.stages.length) {
+      gameState.phase = "gameOver";
+      gameState.players.forEach(p => {
+        const wl = p.insurances.find(i => i.insuranceId === "wholeLife");
+        if (wl && wl.deathBenefit > 0) {
+          p.assets = Math.round((p.assets + wl.deathBenefit) * 10) / 10;
+        }
+      });
+    } else {
+      gameState.currentStageIndex = next;
+      gameState.currentTurnInStage = 0;
+      gameState.phase = "mandatoryStop";
+    }
+  }
+  return { eventCard, playerResults };
+}
+
+// ─── evaluateGoals ───
+function evaluateGoals(player, goalsData) {
+  return player.goals.map(pg => {
+    const goal = goalsData.goalCards.find(g => g.id === pg.goalId);
+
+    // 支出スコア (A型・C型): 0=未達成 / 0.5=一部達成 / 1=達成
+    // ・資産がマイナスになったターンあり → 0
+    // ・全ターン黒字 かつ 支出がデフォルト未満 → 0.5
+    // ・全ターン黒字 かつ 支出がデフォルト以上 → 1
+    let spendScore = 1;
+    if (goal.hasRecurringCost && goal.activeStages.length > 0) {
+      const activeTurns = player.turnHistory.filter(h => goal.activeStages.includes(h.stageId));
+      if (activeTurns.length === 0) {
+        spendScore = 0; // 対象ステージを未プレイ
+      } else if (!activeTurns.every(h => h.assetsAfter >= 0)) {
+        spendScore = 0; // 赤字ターンあり → 未達成
+      } else if (pg.monthlySpend < goal.defaultMonthlySpend) {
+        spendScore = 0.5; // 全ターン黒字だが支出を減額していた → 一部達成
+      } else {
+        spendScore = 1; // 全ターン黒字 かつ フル支出 → 達成
+      }
+    }
+
+    // 保険チェック (B型・C型)
+    let insLevel = "achieved"; // 保険不要な目的はデフォルト達成
+    if (goal.requiredInsurance.length > 0) {
+      if (pg.goalId === 'goal_12') {
+        // 終身保険はゲーム終了時点で加入しているかだけ判定
+        insLevel = player.insurances.some(pi => pi.insuranceId === 'wholeLife')
+          ? "achieved" : "notAchieved";
+      } else if (player.goalMissedEvents.includes(pg.goalId)) {
+        // 関連イベントに無保険で被弾 → 後から加入しても未達成
+        insLevel = "notAchieved";
+      } else {
+        // 関連イベントが発生しなかった → ゲーム終了時の加入状況で準備度を判定
+        const insured = goal.requiredInsurance.some(rid =>
+          player.insurances.some(pi => pi.insuranceId === rid)
+        );
+        insLevel = insured ? "achieved" : "partialAchieved";
+      }
+    }
+
+    // 一時費用チェック (requiredOptionalCost があるカード)
+    if (goal.requiredOptionalCost) {
+      const paid = player.paidOptionalCosts.includes(goal.requiredOptionalCost);
+      if (!paid) {
+        // goal_12 は一時費用未払いで未達成、それ以外は一部達成に降格
+        if (pg.goalId === 'goal_12') insLevel = "notAchieved";
+        else if (insLevel === "achieved") insLevel = "partialAchieved";
+      }
+    }
+
+    // 総合判定
+    let level;
+    if (goal.type === "A") {
+      // spendScore: 1→達成 / 0.5→一部達成 / 0→未達成
+      level = spendScore === 1 ? "achieved" : spendScore === 0.5 ? "partialAchieved" : "notAchieved";
+    } else if (goal.type === "B") {
+      level = insLevel; // achieved / partialAchieved / notAchieved
+    } else { // C型: 支出と保険の両方
+      const insScore = insLevel === "achieved" ? 1 : insLevel === "partialAchieved" ? 0.5 : 0;
+      const combined = (spendScore + insScore) / 2;
+      level = combined >= 1 ? "achieved" : combined > 0 ? "partialAchieved" : "notAchieved";
+    }
+
+    // A型も一時費用チェック
+    if (goal.type === "A" && goal.requiredOptionalCost) {
+      const paid = player.paidOptionalCosts.includes(goal.requiredOptionalCost);
+      if (!paid && level === "achieved") level = "partialAchieved";
+    }
+
+    return { goalId: pg.goalId, title: goal.title, type: goal.type, level,
+             scoreWeight: goalsData.achievementLevels[level].scoreWeight,
+             spendScore, insLevel };
+  });
+}
+
+const OPT_COST_BONUS = { marriage: 10, childbirth: 5, retirement: 5, inheritance: 8 };
+
+function calculateFinalScore(player, goalsData) {
+  const goalResults = evaluateGoals(player, goalsData);
+  const total = goalResults.length;
+  const achieved = goalResults.filter(r => r.level === "achieved").length;
+  const partial  = goalResults.filter(r => r.level === "partialAchieved").length;
+  const weightedSum = goalResults.reduce((s, r) => s + r.scoreWeight, 0);
+  const achievementRate = total > 0 ? (weightedSum / total) * 100 : 0;
+  const bonusScore = achieved * 10;
+  // 一時費用ボーナス点
+  const optCostBonusDetails = (player.paidOptionalCosts || []).map(stopId => ({
+    stopId, points: OPT_COST_BONUS[stopId] || 0
+  })).filter(d => d.points > 0);
+  const optCostBonusScore = optCostBonusDetails.reduce((s, d) => s + d.points, 0);
+  // 赤字ペナルティ: 50万円ごとに5点減点
+  const bankruptPenalty = player.assets < 0
+    ? Math.floor(Math.abs(player.assets) / 50) * 5 : 0;
+  return { goalResults, achievedCount:achieved, partialCount:partial, totalCount:total,
+           achievementRate: Math.round(achievementRate*10)/10, bonusScore,
+           optCostBonusScore, optCostBonusDetails,
+           bankruptPenalty,
+           totalScore: Math.max(0, Math.round(achievementRate + bonusScore + optCostBonusScore - bankruptPenalty)),
+           finalAssets: player.assets };
+}
+
+function getMonthlyPremiumTotal(player) { return player.insurances.reduce((s,i) => s + i.monthlyPremium, 0); }
+
+function previewPremium(insId, stopId, insuranceData) {
+  const ins = insuranceData.insuranceTypes.find(i => i.id === insId);
+  const mult = insuranceData.timingMultipliers.find(t => t.stopId === stopId);
+  return ins && mult ? Math.round(ins.baseMonthlyPremium * mult.multiplier) : 0;
+}
+
+function canEnroll(insId, stopId, insuranceData) {
+  const ins = insuranceData.insuranceTypes.find(i => i.id === insId);
+  if (!ins) return false;
+  const curMult = insuranceData.timingMultipliers.find(t => t.stopId === stopId).multiplier;
+  if (ins.minEnrollmentStop) {
+    const minMult = insuranceData.timingMultipliers.find(t => t.stopId === ins.minEnrollmentStop).multiplier;
+    if (curMult < minMult) return false;
+  }
+  if (ins.maxEnrollmentStop) {
+    const maxMult = insuranceData.timingMultipliers.find(t => t.stopId === ins.maxEnrollmentStop).multiplier;
+    if (curMult > maxMult) return false;
+  }
+  return true;
+}
+</script>
+
+<!-- ===== PLAYTEST APP ===== -->
+<script>
+// ─── App State ───
+const S = {
+  phase: "setup",        // setup | goals | insurance | turn | results
+  gs: null,              // gameState
+  pIdx: 0,               // player index for per-player phases
+  pendGoals: {},         // { playerId: [{ goalId, monthlySpend }] }
+  pendIns: {},           // { playerId: { add:Set, remove:Set } }
+  pendOptCost: {},       // { playerId+"_optCost": bool }
+  lastResult: null,      // last processTurn result
+  rolled: false,         // whether dice was rolled this turn
+  setupData: { count: 2, names: ["プレイヤー1","プレイヤー2"], lifestyle: "steady" },
+  detailPlayer: null,        // playerId currently shown in detail modal (null = closed)
+  expandedBreakdown: new Set() // playerIds with expanded expense breakdown
+};
+
+const $ = id => document.getElementById(id);
+const app = document.getElementById("app");
+
+function fmt(n) { return (n >= 0 ? "+" : "") + n.toFixed(1) + "万円"; }
+function fmtAsset(n) { const c = n < 0 ? "neg" : "pos"; return `<span class="${c}">${n.toFixed(1)}万円</span>`; }
+function fmtYen(n) { return n.toLocaleString() + "円"; }
+function stageInfo(idx) { return STAGES_DATA.stages[idx]; }
+
+// ─── Render dispatcher ───
+function render() {
+  switch (S.phase) {
+    case "setup":     renderSetup();     break;
+    case "goals":     renderGoals();     break;
+    case "insurance": renderInsurance(); break;
+    case "turn":      renderTurn();      break;
+    case "results":   renderResults();   break;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+// SCREEN 1: Setup
+// ─────────────────────────────────────────────────────────────
+function renderSetup() {
+  const lifestyleCards = LIFESTYLES_DATA.lifestyles.map(ls => `
+    <div class="lifestyle-card ${S.setupData.lifestyle === ls.id ? 'selected' : ''}" onclick="selLifestyle('${ls.id}')">
+      <div class="lifestyle-name">${ls.name}</div>
+      <div class="lifestyle-diff">難易度: ${"★".repeat(ls.difficulty)}${"☆".repeat(5-ls.difficulty)}</div>
+      <div class="lifestyle-assets">初期資産: ${ls.initialAssets}万円</div>
+      <div class="lifestyle-desc">${ls.description}</div>
+    </div>`).join("");
+
+  let nameFields = "";
+  for (let i = 0; i < S.setupData.count; i++) {
+    nameFields += `<div style="margin-bottom:6px">
+      <label>プレイヤー${i+1}の名前</label><br>
+      <input type="text" value="${S.setupData.names[i]||''}" oninput="setName(${i},this.value)" style="width:200px">
+    </div>`;
+  }
+
+  app.innerHTML = `
+    <h1>InsuLife — プレイテスト版</h1>
+    <div class="panel">
+      <div class="panel-title">プレイヤー設定</div>
+      <div class="flex-row" style="margin-bottom:12px">
+        <label>プレイヤー人数：</label>
+        <select onchange="setCount(this.value)">
+          ${[1,2,3,4,5].map(n=>`<option value="${n}" ${S.setupData.count==n?'selected':''}>${n}人</option>`).join("")}
+        </select>
+      </div>
+      ${nameFields}
+    </div>
+    <div class="panel">
+      <div class="panel-title">ライフスタイル選択（全員共通）</div>
+      <div class="grid2">${lifestyleCards}</div>
+    </div>
+    <div style="text-align:right">
+      <button class="btn-primary" onclick="beginGame()">ゲーム開始 →</button>
+    </div>`;
+}
+
+function selLifestyle(id) { S.setupData.lifestyle = id; render(); }
+function setCount(v) {
+  S.setupData.count = parseInt(v);
+  while (S.setupData.names.length < S.setupData.count) S.setupData.names.push("プレイヤー"+(S.setupData.names.length+1));
+  render();
+}
+function setName(i, v) { S.setupData.names[i] = v; }
+
+function beginGame() {
+  const ids = S.setupData.names.slice(0, S.setupData.count).map((n,i) => n||"プレイヤー"+(i+1));
+  S.gs = initGame({ lifestyleId: S.setupData.lifestyle, playerIds: ids, lifestylesData: LIFESTYLES_DATA, stagesData: STAGES_DATA });
+  // Initialize pending structures
+  S.pendGoalSpend = {};
+  S.gs.players.forEach(p => {
+    S.pendGoals[p.id] = {};
+    S.pendGoalSpend[p.id] = {};
+    S.pendIns[p.id] = { add: new Set(), remove: new Set() };
+    S.pendOptCost[p.id + "_optCost"] = false;
+  });
+  S.phase = "goals";
+  S.pIdx = 0;
+  render();
+}
+
+// ─────────────────────────────────────────────────────────────
+// SCREEN 2: Goal Selection (per player, with player tabs)
+// ─────────────────────────────────────────────────────────────
+function renderGoals() {
+  const player = S.gs.players[S.pIdx];
+  const sel = S.pendGoals[player.id];
+  const count = Object.keys(sel).length;
+  const lifestyle = S.gs.lifestyle;
+  // pendGoals の選択枚数で各プレイヤーの準備完了を判定
+  const playerReady = p => Object.keys(S.pendGoals[p.id]).length >= 2;
+  const allReady = S.gs.players.every(playerReady);
+  const insNames = { medical:"医療保険", cancer:"がん保険", disability:"就業不能保険",
+    accident:"傷害保険", wholeLife:"終身保険", nursing:"介護保険（民間）",
+    personalPension:"個人年金保険", variableAnnuity:"変額・外貨建て保険" };
+
+  let totalMonthly = 0;
+  for (const [gid, gs] of Object.entries(sel)) {
+    const goal = GOALS_DATA.goalCards.find(g => g.id === gid);
+    if (goal && goal.hasRecurringCost) totalMonthly += gs.monthlySpend;
+  }
+
+  // プレイヤータブ（2人以上のとき表示）
+  let tabsHtml = "";
+  if (S.gs.players.length > 1) {
+    const tabs = S.gs.players.map((p, idx) => {
+      const done = playerReady(p);
+      const active = idx === S.pIdx;
+      const baseStyle = done
+        ? "background:#1a5c38; color:#5dde9a; border:2px solid #27ae60;"
+        : "background:#2a2a50; color:#99a; border:2px solid #3a3a70;";
+      const activeStyle = active
+        ? "border-bottom-color:transparent; opacity:1; font-weight:bold;"
+        : "opacity:0.65; border-bottom-color:transparent;";
+      return `<button onclick="switchGoalPlayer(${idx})"
+        style="${baseStyle} ${activeStyle} padding:6px 14px; border-radius:6px 6px 0 0;
+               font-size:13px; cursor:pointer; margin-right:4px; border-bottom:none;">
+        ${done ? "✓ " : ""}${p.id}
+      </button>`;
+    }).join("");
+    tabsHtml = `
+      <div style="display:flex; flex-wrap:wrap; border-bottom:2px solid #2a2a50; margin-bottom:12px; padding-bottom:0;">
+        ${tabs}
+      </div>`;
+  }
+
+  // ライフスタイル情報パネル
+  const keyInsHtml = lifestyle.keyInsurance.map(id =>
+    `<span class="tag tag-ins">${insNames[id] || id}</span>`).join(" ");
+  const lifestylePanel = `
+    <div class="panel" style="border-color:#7ec8e3; background:#0d1a2a;">
+      <div class="panel-title" style="color:#7ec8e3">あなたのライフスタイル</div>
+      <div class="flex-row" style="align-items:flex-start; gap:16px; flex-wrap:wrap;">
+        <div>
+          <div style="font-size:18px; font-weight:bold; color:#fff; margin-bottom:4px">
+            ${lifestyle.name}
+            <span style="font-size:13px; color:#f39c12; margin-left:8px">難易度 ${"★".repeat(lifestyle.difficulty)}${"☆".repeat(5-lifestyle.difficulty)}</span>
+          </div>
+          <div style="color:#99a; font-size:13px; margin-bottom:6px">${lifestyle.description}</div>
+          <div style="font-size:12px; color:#778;">初期資産: <strong style="color:#27ae60">${lifestyle.initialAssets}万円</strong></div>
+        </div>
+        <div style="min-width:180px">
+          <div style="font-size:12px; color:#99a; margin-bottom:4px">このライフスタイルで重要な保険</div>
+          <div style="display:flex; flex-wrap:wrap; gap:4px">${keyInsHtml}</div>
+        </div>
+      </div>
+    </div>`;
+
+  // カテゴリ別にグループ化して表示
+  const categoryOrder = ["family","health","career","retirement"];
+  const grouped = categoryOrder.map(cat => {
+    const goalsInCat = GOALS_DATA.goalCards.filter(g => g.category === cat);
+    if (goalsInCat.length === 0) return "";
+    const cardHtml = goalsInCat.map(goal => {
+      const isSel = !!sel[goal.id];
+      const ms = sel[goal.id]?.monthlySpend ?? goal.defaultMonthlySpend;
+      return `
+        <div class="goal-card ${isSel ? 'selected' : ''}" onclick="toggleGoal('${goal.id}')">
+          <span class="goal-type goal-type-${goal.type}">${goal.type}タイプ</span>
+          <div class="goal-title-text">${goal.title}</div>
+          ${goal.hasRecurringCost ? `<div class="goal-cost">月額支出: ${ms.toLocaleString()}円/月</div>` : `<div class="goal-cost">支出なし</div>`}
+          <div class="goal-note">${goal.achievementNote}</div>
+        </div>`;
+    }).join("");
+    return `
+      <div style="margin-bottom:16px">
+        <h3 style="color:#7ec8e3; margin-bottom:8px; border-bottom:1px solid #2a2a50; padding-bottom:4px">
+          ${CATEGORY_NAMES[cat] || cat}
+        </h3>
+        <div class="goal-grid">${cardHtml}</div>
+      </div>`;
+  }).join("");
+
+  // 全員の選択状況サマリー（2人以上のとき）
+  let summaryHtml = "";
+  if (S.gs.players.length > 1) {
+    const statusItems = S.gs.players.map(p => {
+      const done = playerReady(p);
+      const n = Object.keys(S.pendGoals[p.id]).length;
+      const color = done ? "#5dde9a" : "#778";
+      const icon = done ? "✓" : "…";
+      return `<span style="color:${color}; font-size:12px; margin-right:12px">${icon} ${p.id}（${n}枚）</span>`;
+    }).join("");
+    const readyCount = S.gs.players.filter(playerReady).length;
+    summaryHtml = `
+      <div style="background:#0d1020; border:1px solid #2a2a50; border-radius:6px; padding:8px 12px; margin-bottom:12px; display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+        <span style="font-size:12px; color:#99a; margin-right:4px">選択状況:</span>
+        ${statusItems}
+        <span style="font-size:12px; color:#99a; margin-left:auto">${readyCount} / ${S.gs.players.length} 人完了</span>
+      </div>`;
+  }
+
+  app.innerHTML = `
+    <h1>目的カード選択</h1>
+    ${tabsHtml}
+    ${lifestylePanel}
+    <div class="panel">
+      <div class="panel-title">${player.id} さんの人生の目的を選んでください（最低2枚）</div>
+      <div class="flex-row">
+        <span>選択中: <strong>${count}枚</strong></span>
+        ${totalMonthly > 0 ? `<span>目的支出合計: <strong style="color:#f39c12">${totalMonthly.toLocaleString()}円/月</strong></span>` : ""}
+        <span class="tip">• Aタイプ: 支出継続が条件　• Bタイプ: 保険加入が条件　• Cタイプ: 両方</span>
+      </div>
+    </div>
+    <div>${grouped}</div>
+    ${summaryHtml}
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px">
+      <button class="btn-back" onclick="goBackFromGoals()">← 戻る</button>
+      <div style="display:flex; gap:8px; align-items:center">
+        ${!allReady ? `<span style="font-size:12px; color:#778">全員が2枚以上選ぶと進めます</span>` : ""}
+        <button class="btn-confirm" ${allReady ? "" : "disabled"} onclick="proceedToInsurance()">
+          保険選択へ →
+        </button>
+      </div>
+    </div>`;
+}
+
+function switchGoalPlayer(idx) {
+  S.pIdx = idx;
+  render();
+}
+
+function goBackFromGoals() {
+  S.gs = null;
+  S.pendGoals = {};
+  S.pendIns = {};
+  S.pendOptCost = {};
+  S.phase = "setup";
+  render();
+}
+
+function toggleGoal(gid) {
+  const sel = S.pendGoals[S.gs.players[S.pIdx].id];
+  const goal = GOALS_DATA.goalCards.find(g => g.id === gid);
+  if (sel[gid]) { delete sel[gid]; }
+  else { sel[gid] = { goalId: gid, monthlySpend: goal.defaultMonthlySpend }; }
+  render();
+}
+
+function proceedToInsurance() {
+  // 全プレイヤーの選択を一括で確定してから保険画面へ
+  S.gs.players.forEach(p => {
+    const selections = Object.values(S.pendGoals[p.id]);
+    setPlayerGoals(p, selections, GOALS_DATA);
+  });
+  S.phase = "insurance";
+  S.pIdx = 0;
+  render();
+}
+
+// ─────────────────────────────────────────────────────────────
+// SCREEN 3: Insurance Review (per player, at each mandatory stop)
+// ─────────────────────────────────────────────────────────────
+function renderInsurance() {
+  const player = S.gs.players[S.pIdx];
+  const stage = stageInfo(S.gs.currentStageIndex);
+  const stopId = stage.mandatoryStopBefore.stopId;
+  const stopName = stage.mandatoryStopBefore.stopName;
+  const optCost = stage.mandatoryStopBefore.optionalCost;
+  const multEntry = INSURANCE_DATA.timingMultipliers.find(t => t.stopId === stopId);
+  const pend = S.pendIns[player.id];
+  const enrolled = new Set(player.insurances.map(i => i.insuranceId));
+  // Effective enrolled = (enrolled - remove) + add
+  const effEnrolled = new Set([...enrolled].filter(id => !pend.remove.has(id)));
+  pend.add.forEach(id => effEnrolled.add(id));
+
+  let totalMonthly = player.insurances
+    .filter(i => !pend.remove.has(i.insuranceId))
+    .reduce((s,i) => s + i.monthlyPremium, 0);
+  pend.add.forEach(id => {
+    if (!enrolled.has(id)) totalMonthly += previewPremium(id, stopId, INSURANCE_DATA);
+  });
+
+  // Optional cost panel (only show on first player's view to avoid repetition)
+  const optCostBonus = optCost ? (OPT_COST_BONUS[stopId] || 0) : 0;
+  const optCostHtml = (optCost && S.pIdx === 0) ? `
+    <div class="panel" style="border-color:#f39c12">
+      <div class="panel-title" style="color:#f39c12">ライフイベント一時費用（選択式）</div>
+      <div class="info-row">
+        <div class="info-item">イベント: <span>${stopName}</span></div>
+        <div class="info-item">費用: <span style="color:#f39c12">${optCost.amount}万円</span></div>
+        <div class="info-item" style="color:#99a">${optCost.label}</div>
+        ${optCostBonus > 0 ? `<div class="info-item">支払うと: <span style="color:#27ae60; font-weight:bold">最終スコア ＋${optCostBonus}点</span></div>` : ""}
+      </div>
+      <div style="margin-top:10px">各プレイヤーが個別に支払うかどうか選択してください。</div>
+    </div>` : "";
+
+  // Optional cost per player
+  const pendOptKey = player.id + "_optCost";
+  if (!(pendOptKey in S.pendOptCost)) S.pendOptCost[pendOptKey] = false;
+
+  const rows = INSURANCE_DATA.insuranceTypes.map(ins => {
+    const isEnrolled = enrolled.has(ins.id);
+    const isAdding = pend.add.has(ins.id);
+    const isRemoving = pend.remove.has(ins.id);
+    const isEffective = effEnrolled.has(ins.id);
+    const ok = canEnroll(ins.id, stopId, INSURANCE_DATA);
+    const premium = isEnrolled
+      ? player.insurances.find(i => i.insuranceId === ins.id).monthlyPremium
+      : previewPremium(ins.id, stopId, INSURANCE_DATA);
+    const mult = multEntry.multiplier;
+
+    let actionBtn = "";
+    if (isEnrolled && !isRemoving) {
+      actionBtn = `<button class="btn-warn btn-sm" onclick="pendRemove('${ins.id}')">解約</button>`;
+    } else if (isEnrolled && isRemoving) {
+      actionBtn = `<button class="btn-confirm btn-sm" onclick="undoRemove('${ins.id}')">解約取消</button>`;
+    } else if (!isEnrolled && ok && !isAdding) {
+      actionBtn = `<button class="btn-action btn-sm" onclick="pendAdd('${ins.id}')">加入</button>`;
+    } else if (!isEnrolled && ok && isAdding) {
+      actionBtn = `<button class="btn-confirm btn-sm" onclick="undoAdd('${ins.id}')">加入取消</button>`;
+    } else if (!ok) {
+      // 加入不可の理由を表示
+      let reason = "加入不可";
+      if (ins.minEnrollmentStop) {
+        const minStop = INSURANCE_DATA.timingMultipliers.find(t => t.stopId === ins.minEnrollmentStop);
+        const curMult = INSURANCE_DATA.timingMultipliers.find(t => t.stopId === stopId).multiplier;
+        if (minStop && curMult < minStop.multiplier) reason = minStop.stopName + "以降加入可";
+      }
+      actionBtn = `<span class="tip">${reason}</span>`;
+    }
+
+    const rowClass = isEffective ? "enrolled" : "";
+    const statusBadge = isRemoving ? `<span style="color:#e94560">[解約予定]</span>` :
+                        isAdding   ? `<span style="color:#27ae60">[加入予定]</span>` :
+                        isEnrolled ? `<span class="badge-achieved">加入中</span>` : "";
+
+    // 特殊効果の追加表示
+    let specialNote = "";
+    if (ins.specialEffect === "additionalRetirementIncome" && ins.pensionBonusByStop) {
+      const bonus = ins.pensionBonusByStop[stopId] ?? ins.additionalMonthlyIncome ?? 0;
+      specialNote = `<br><span class="tip" style="color:#7ec8e3">老後受取: +${bonus.toLocaleString()}円/月</span>`;
+    }
+    if (ins.specialEffect === "deathBenefit" && ins.deathBenefitByStop) {
+      const benefit = ins.deathBenefitByStop[stopId] ?? 0;
+      specialNote = `<br><span class="tip" style="color:#f39c12">死亡保険金: ${benefit}万円</span>`;
+    }
+
+    return `<tr class="${rowClass}">
+      <td><strong>${ins.name}</strong><br><span class="tip">${ins.description}</span>${specialNote}</td>
+      <td>${fmtYen(premium)} ${mult > 1 ? `<span class="premium-up">（×${mult}）</span>` : ""}</td>
+      <td>${ins.reductionRate > 0 ? Math.round(ins.reductionRate*100)+"%" : ins.specialEffect ? "特殊効果" : "−"}</td>
+      <td>${ins.coverageCategories.map(c => EVENTS_DATA.eventCategories[c]?.name || c).join("・") || ins.specialEffect ? "特殊" : "−"}</td>
+      <td>${statusBadge} ${actionBtn}</td>
+    </tr>`;
+  }).join("");
+
+  const payingOptCost = S.pendOptCost[pendOptKey];
+  // 一時費用が目的カードの達成条件になっているか確認
+  const relatedGoals = optCost ? player.goals.filter(pg => {
+    const goal = GOALS_DATA.goalCards.find(g => g.id === pg.goalId);
+    return goal && goal.requiredOptionalCost === stopId;
+  }) : [];
+
+  // 【B2-1】ゴール影響警告バナー：支払わないとゴール達成に影響するケースを明示
+  let goalImpactBannerHtml = "";
+  if (relatedGoals.length > 0 && optCost) {
+    const goalItems = relatedGoals.map(pg => {
+      const goal = GOALS_DATA.goalCards.find(g => g.id === pg.goalId);
+      // goal_12（終身保険）は相続費用未払いで「未達成」、それ以外は「一部達成」
+      const impact = pg.goalId === 'goal_12' ? '未達成' : '一部達成';
+      const impactColor = impact === '未達成' ? '#e94560' : '#f39c12';
+      return `<div style="display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:1px solid rgba(243,156,18,0.2);">
+        <span style="color:${impactColor};font-size:18px;line-height:1.2;flex-shrink:0">▶</span>
+        <div>
+          <span style="color:#dde;font-size:14px;font-weight:bold">「${goal.title}」</span>
+          <span style="color:${impactColor};font-size:14px;font-weight:bold">が${impact}になります</span>
+          ${impact === '未達成' ? '<div style="color:#e94560;font-size:12px;margin-top:2px">⚠ 目的カード達成が完全に失われます</div>' : '<div style="color:#778;font-size:12px;margin-top:2px">スコアが0.5倍になります</div>'}
+        </div>
+      </div>`;
+    }).join('');
+
+    goalImpactBannerHtml = `
+      <div style="background:#1e1200;border:2px solid #f39c12;border-radius:8px;padding:12px 14px;margin-bottom:12px;">
+        <div style="color:#f39c12;font-size:15px;font-weight:bold;margin-bottom:8px;">
+          ⚠️ このイベント費用を支払わないと…
+        </div>
+        ${goalItems}
+      </div>`;
+  }
+
+  const optCostPlayerHtml = optCost ? `
+    <div class="panel" style="border-color:#f39c12;margin-bottom:10px;">
+      <div class="panel-title" style="color:#f39c12">ライフイベント費用の選択 — ${player.id}</div>
+      ${goalImpactBannerHtml}
+      <div style="margin-bottom:12px;">
+        <div style="font-size:14px;font-weight:bold;color:#dde;margin-bottom:4px;">${optCost.label}</div>
+        <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:center;">
+          <span style="font-size:13px;color:#99a;">費用: <strong style="color:#f39c12;font-size:16px;">${optCost.amount}万円</strong></span>
+          <span style="font-size:13px;color:#99a;">現在資産: ${fmtAsset(player.assets)}</span>
+          ${optCostBonus > 0 ? `<span style="font-size:13px;color:#27ae60;">✅ 支払うと最終スコア＋${optCostBonus}点</span>` : ""}
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <button onclick="if(!${payingOptCost})toggleOptCost('${pendOptKey}')"
+          style="flex:1;min-width:130px;padding:10px 16px;font-size:15px;font-weight:bold;border-radius:6px;cursor:pointer;border:2px solid;
+                 background:${payingOptCost ? '#1a5c38' : '#0d1a10'};
+                 color:${payingOptCost ? '#5dde9a' : '#3a6a48'};
+                 border-color:${payingOptCost ? '#27ae60' : '#2a4a32'};">
+          ${payingOptCost ? '✓ 支払う（選択中）' : '支払う（' + optCost.amount + '万円）'}
+        </button>
+        <button onclick="if(${payingOptCost})toggleOptCost('${pendOptKey}')"
+          style="flex:1;min-width:100px;padding:10px 16px;font-size:15px;font-weight:bold;border-radius:6px;cursor:pointer;border:2px solid;
+                 background:${!payingOptCost ? '#1a1a38' : '#0d0d20'};
+                 color:${!payingOptCost ? '#dde' : '#445'};
+                 border-color:${!payingOptCost ? '#3a3a70' : '#1a1a38'};">
+          ${!payingOptCost ? '✓ スキップ（選択中）' : 'スキップに変更'}
+        </button>
+      </div>
+    </div>` : "";
+
+  // 目的支出調整パネル
+  const recurringGoals = player.goals.filter(pg => {
+    const goal = GOALS_DATA.goalCards.find(g => g.id === pg.goalId);
+    return goal && goal.hasRecurringCost;
+  });
+  let goalSpendHtml = "";
+  if (recurringGoals.length > 0) {
+    const spendAdj = S.pendGoalSpend[player.id] || {};
+    const goalRows = recurringGoals.map(pg => {
+      const goal = GOALS_DATA.goalCards.find(g => g.id === pg.goalId);
+      const cur = spendAdj[pg.goalId] ?? pg.monthlySpend;
+      const def = goal.defaultMonthlySpend;
+      const min = Math.round(def * 0.5 / 5000) * 5000;
+      const max = Math.round(def * 2.0 / 5000) * 5000;
+      const pct = Math.round(cur / def * 100);
+      const isActive = goal.activeStages.includes(stage.id);
+      const annualCost = (cur * 12 / 10000).toFixed(1);
+      const turnCost = (cur * 12 / 10000 * stage.yearsPerTurn).toFixed(1);
+      const reducedWarning = cur < def
+        ? `<span style="color:#e67e22; font-size:11px"> ⚠ 減額中（一部達成リスク）</span>` : "";
+      return `
+        <tr>
+          <td>
+            <span class="goal-type goal-type-${goal.type}">${goal.type}</span>
+            ${goal.title}
+            ${isActive ? '<span style="color:#27ae60; font-size:11px"> ●このステージで支出</span>' : '<span style="color:#778; font-size:11px"> ○次ステージ以降</span>'}
+            ${reducedWarning}
+          </td>
+          <td style="text-align:center">
+            <button class="btn-sm btn-back" onclick="adjustGoalSpend('${player.id}','${pg.goalId}',-5000)" ${cur <= min ? 'disabled' : ''}>－</button>
+            <strong style="margin: 0 8px; color:${pct < 100 ? '#e67e22' : pct > 100 ? '#7ec8e3' : '#dde'}">${fmtYen(cur)}/月</strong>
+            <button class="btn-sm btn-back" onclick="adjustGoalSpend('${player.id}','${pg.goalId}',5000)" ${cur >= max ? 'disabled' : ''}>＋</button>
+            <span style="color:#778; font-size:11px; margin-left:6px">(${pct}%)</span>
+          </td>
+          <td style="color:#f39c12; text-align:right">${annualCost}万/年</td>
+          <td style="color:#e94560; text-align:right">${turnCost}万/ターン</td>
+        </tr>`;
+    }).join("");
+    goalSpendHtml = `
+      <div class="panel" style="margin-top:12px">
+        <div class="panel-title">目的カードの支出見直し（任意）</div>
+        <div class="tip" style="margin-bottom:8px">デフォルト額の50%〜200%の範囲で調整できます。減額は一部達成リスクがあります。</div>
+        <table class="ins-table">
+          <thead><tr><th>目的カード</th><th style="text-align:center">月額支出</th><th>年額</th><th>今ターン</th></tr></thead>
+          <tbody>${goalRows}</tbody>
+        </table>
+      </div>`;
+  }
+
+  app.innerHTML = `
+    <h1>強制ストップ — ${stopName}</h1>
+    ${optCostHtml}
+    ${optCostPlayerHtml}
+    <div class="panel">
+      <div class="panel-title">${player.id} さんの保険見直し（${S.pIdx+1}人目 / ${S.gs.players.length}人中）</div>
+      <div class="info-row">
+        <div class="info-item">ステージ: <span>${stage.name}（${stage.ageRange}）</span></div>
+        <div class="info-item">経過年数/ターン: <span>${stage.yearsPerTurn}年</span></div>
+        <div class="info-item">加入乗数: <span>×${multEntry.multiplier}（${multEntry.ageGuide}時点）</span></div>
+        <div class="info-item">月額保険料合計（予定）: <span style="color:#f39c12">${fmtYen(totalMonthly)}/月</span></div>
+        <div class="info-item">年額: <span style="color:#e94560">${((totalMonthly*12)/10000).toFixed(1)}万円/年</span></div>
+      </div>
+    </div>
+    <div class="panel" style="overflow-x:auto">
+      <table class="ins-table">
+        <thead><tr><th>保険名・説明</th><th>月額保険料</th><th>損失軽減率</th><th>対象イベント</th><th>操作</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+    ${goalSpendHtml}
+    <div style="text-align:right">
+      <button class="btn-confirm" onclick="confirmInsurance()">
+        ${S.pIdx < S.gs.players.length - 1 ? "次のプレイヤーへ →" : "ターン開始 →"}
+      </button>
+    </div>`;
+}
+
+function pendAdd(id)    { S.pendIns[S.gs.players[S.pIdx].id].add.add(id);    render(); }
+function undoAdd(id)    { S.pendIns[S.gs.players[S.pIdx].id].add.delete(id); render(); }
+function pendRemove(id) { S.pendIns[S.gs.players[S.pIdx].id].remove.add(id); render(); }
+function undoRemove(id) { S.pendIns[S.gs.players[S.pIdx].id].remove.delete(id); render(); }
+function toggleOptCost(key) { S.pendOptCost[key] = !S.pendOptCost[key]; render(); }
+
+function adjustGoalSpend(playerId, goalId, delta) {
+  const player = S.gs.players.find(p => p.id === playerId);
+  const pg = player.goals.find(g => g.goalId === goalId);
+  if (!pg) return;
+  const goal = GOALS_DATA.goalCards.find(g => g.id === goalId);
+  const min = Math.round(goal.defaultMonthlySpend * 0.5 / 5000) * 5000;
+  const max = Math.round(goal.defaultMonthlySpend * 2.0 / 5000) * 5000;
+  const cur = S.pendGoalSpend[playerId][goalId] ?? pg.monthlySpend;
+  const next = Math.min(max, Math.max(min, cur + delta));
+  S.pendGoalSpend[playerId][goalId] = next;
+  render();
+}
+
+function confirmInsurance() {
+  const player = S.gs.players[S.pIdx];
+  const stage = stageInfo(S.gs.currentStageIndex);
+  const pend = S.pendIns[player.id];
+  const stopId = stage.mandatoryStopBefore.stopId;
+
+  // 一時費用の支払い
+  const optCost = stage.mandatoryStopBefore.optionalCost;
+  if (optCost && S.pendOptCost[player.id + "_optCost"]) {
+    payOptionalCost(player, optCost.amount);
+    player.paidOptionalCosts.push(stopId);
+  }
+
+  // 保険の変更を適用
+  reviewInsurance(player, [...pend.add], [...pend.remove], stopId, INSURANCE_DATA);
+
+  // 目的支出の調整を適用
+  const spendAdj = S.pendGoalSpend[player.id] || {};
+  Object.entries(spendAdj).forEach(([goalId, newSpend]) => {
+    const pg = player.goals.find(g => g.goalId === goalId);
+    if (pg) pg.monthlySpend = newSpend;
+  });
+
+  // pendingリセット
+  S.pendIns[player.id] = { add: new Set(), remove: new Set() };
+  S.pendOptCost[player.id + "_optCost"] = false;
+  S.pendGoalSpend[player.id] = {};
+
+  S.pIdx++;
+  if (S.pIdx >= S.gs.players.length) {
+    completeMandatoryStop(S.gs);
+    S.phase = "turn";
+    S.pIdx = 0;
+    S.lastResult = null;
+    S.rolled = false;
+  }
+  render();
+}
+
+// ─────────────────────────────────────────────────────────────
+// SCREEN 4: Turn
+// ─────────────────────────────────────────────────────────────
+function renderTurn() {
+  const stage = stageInfo(S.gs.currentStageIndex);
+  const totalTurns = STAGES_DATA.stages.reduce((s,st) => s + st.turns, 0);
+
+  // Stage progress bar
+  let pips = "";
+  let turnsSoFar = 0;
+  STAGES_DATA.stages.forEach((st, si) => {
+    for (let t = 0; t < st.turns; t++) {
+      const globalTurnNum = turnsSoFar + t;
+      const cls = globalTurnNum < S.gs.globalTurn ? "done" : globalTurnNum === S.gs.globalTurn ? "current" : "";
+      pips += `<div class="stage-pip ${cls}" title="${st.name} T${t+1}"></div>`;
+    }
+    turnsSoFar += st.turns;
+  });
+
+  const infoBar = `
+    <div class="info-row">
+      <div class="info-item">ステージ: <span>${stage.name}（${stage.ageRange}）</span></div>
+      <div class="info-item">ステージ内ターン: <span>${S.gs.currentTurnInStage + (S.rolled?0:0)+1} / ${stage.turns}</span></div>
+      <div class="info-item">通算ターン: <span>${S.gs.globalTurn + 1} / ${totalTurns}</span></div>
+    </div>`;
+
+  const years = stage.yearsPerTurn || 1;
+  const annualIncome = (stage.monthlyIncome * 12) / 10000;
+  const annualBasic  = stage.annualBasicExpense || 0;
+
+  // Player asset summary
+  const assetTable = `
+    <div class="tip" style="margin-bottom:6px">このターンの経過年数: <strong style="color:#7ec8e3">${years}年分</strong>　年収: ${annualIncome.toFixed(0)}万円/年　基礎生活費: ${annualBasic}万円/年　差引: ${(annualIncome - annualBasic).toFixed(0)}万円/年</div>
+    <table class="results-table" style="margin-bottom:10px">
+      <thead><tr>
+        <th>プレイヤー</th><th>現在資産</th><th>月額保険料</th><th>保険料/ターン</th><th>目的支出/ターン</th>
+      </tr></thead>
+      <tbody>${S.gs.players.map(p => {
+        const ms = getMonthlyPremiumTotal(p);
+        const ap = calculateAnnualPremium(p);
+        const gs = calculateAnnualGoalSpend(p, stage.id, GOALS_DATA);
+        return `<tr>
+          <td>
+            <button class="player-name-btn" onclick="showPlayerDetail('${p.id}')">${p.id}</button>
+            <span class="player-name-hint">ℹ️</span>
+          </td>
+          <td>${fmtAsset(p.assets)}</td>
+          <td>${fmtYen(ms)}/月</td>
+          <td>${(ap * years).toFixed(1)}万円</td>
+          <td>${gs > 0 ? (gs * years).toFixed(1)+"万円" : "−"}</td>
+        </tr>`;
+      }).join("")}</tbody>
+    </table>`;
+
+  let eventSection = "";
+  let actionBtn = "";
+
+  if (!S.rolled) {
+    eventSection = `<div class="panel"><div class="panel-title">イベントが発生します</div>
+      <p class="tip">「サイコロを振る」ボタンで今ターンのイベントを決定します。全員に同じイベントが発生します。</p></div>`;
+    actionBtn = `<button class="btn-primary" onclick="doRoll()">🎲 サイコロを振る</button>`;
+  } else {
+    const r = S.lastResult;
+    const ev = r.eventCard;
+    const catInfo = EVENTS_DATA.eventCategories[ev.category];
+    const severityLabel = { light:"軽度", medium:"中度", heavy:"重度" }[ev.severity] || ev.severity;
+    // 処理時のステージIDを使用（ターン処理後にステージが進んでいる場合があるため）
+    const processedStageId = r.playerResults[0]?.stageId;
+    const effectiveAmt = (ev.stageAmounts && processedStageId && ev.stageAmounts[processedStageId] !== undefined)
+      ? ev.stageAmounts[processedStageId] : ev.amount;
+    const isLucky = effectiveAmt > 0;
+
+    eventSection = `
+      <div class="event-banner cat-${ev.category}">
+        <div class="ev-cat">${catInfo.name} / ${severityLabel}</div>
+        <div class="ev-title">${ev.title}</div>
+        <div class="ev-desc">${ev.description}</div>
+        <div class="ev-amount" style="color:${isLucky?'#f39c12':'#e94560'}">
+          ${isLucky ? "+" : ""}${effectiveAmt}万円 ${ev.isCancerEvent ? "（がんイベント）" : ""}
+          ${ev.insuranceBenefit ? `<span style="font-size:0.75em;color:#f39c12;display:block">※ 該当保険加入者のみ給付</span>` : ""}
+        </div>
+      </div>
+
+      <div class="tip" style="margin-bottom:6px">※ 収入・基礎生活費・保険料・目的支出はすべて年額×${r.playerResults[0]?.years||1}年分。イベント損失は一時額。単位：万円</div>
+      <table class="results-table">
+        <thead><tr>
+          <th>プレイヤー</th>
+          <th>収入</th>
+          <th>基礎生活費</th>
+          <th>保険料</th>
+          <th>目的支出</th>
+          <th>損害額</th>
+          <th>保険金給付</th>
+          <th>ラッキー給付</th>
+          <th>純変動</th>
+          <th>資産（後）</th>
+        </tr></thead>
+        <tbody>${r.playerResults.map(pr => {
+          const insHelped = pr.insurancePayout > 0;
+          const hasDamage = pr.eventBaseDamage > 0;
+          const isInsBenefitEvent = !!(r.eventCard.insuranceBenefit);
+          return `<tr>
+            <td>${pr.playerId}</td>
+            <td class="pos">+${pr.income.toFixed(1)}</td>
+            <td class="neg">-${pr.basicExpense.toFixed(1)}</td>
+            <td class="neg">${pr.premium > 0 ? "-"+pr.premium.toFixed(1) : "−"}</td>
+            <td class="neg">${pr.goalSpend > 0 ? "-"+pr.goalSpend.toFixed(1) : "−"}</td>
+            <td class="${hasDamage ? 'neg' : 'neutral'}">
+              ${hasDamage ? "-"+pr.eventBaseDamage.toFixed(1) : "−"}
+            </td>
+            <td>
+              ${hasDamage
+                ? insHelped
+                  ? `<span class="pos" style="font-weight:bold">+${pr.insurancePayout.toFixed(1)}万円</span>
+                     <div class="tip">${pr.appliedIns.join("・")}</div>
+                     <div style="color:#e94560;font-size:0.85em">実質負担: -${pr.eventDamage.toFixed(1)}万円</div>`
+                  : `<span class="badge-fail">保険なし</span>
+                     <div style="color:#e94560;font-size:0.85em">実質負担: -${pr.eventDamage.toFixed(1)}万円</div>`
+                : "−"}
+            </td>
+            <td class="${pr.eventGain > 0 ? 'pos' : 'neutral'}">
+              ${pr.eventGain > 0
+                ? `<span style="font-weight:bold">+${pr.eventGain.toFixed(1)}万円</span>`
+                  + (isInsBenefitEvent && pr.eventGain === 0 ? "" : "")
+                : isInsBenefitEvent
+                  ? `<span class="tip">保険なし<br>給付なし</span>`
+                  : "−"}
+            </td>
+            <td class="${pr.netChange >= 0 ? 'pos' : 'neg'}">${fmt(pr.netChange)}</td>
+            <td>${fmtAsset(pr.assetsAfter)}</td>
+          </tr>`;
+        }).join("")}</tbody>
+      </table>
+      ${buildBreakdownAccordion(r)}`;
+
+    const nextLabel = S.gs.phase === "gameOver" ? "結果を見る →"
+                    : S.gs.phase === "mandatoryStop" ? `強制ストップ（${stageInfo(S.gs.currentStageIndex).mandatoryStopBefore.stopName}）へ →`
+                    : "次のターンへ →";
+    actionBtn = `<button class="btn-confirm" onclick="advanceTurn()">${nextLabel}</button>`;
+  }
+
+  app.innerHTML = `
+    <h1>ターン ${S.gs.globalTurn + 1}</h1>
+    <div class="stage-bar">${pips}</div>
+    ${infoBar}
+    <div class="panel">
+      <div class="tip" style="margin-bottom:6px; color:#556;">💡 プレイヤー名をタップするとライフスタイル・目的カード・保険の詳細を確認できます</div>
+      ${assetTable}
+    </div>
+    ${eventSection}
+    <div style="text-align:right; margin-top:12px">${actionBtn}</div>
+    ${S.detailPlayer ? renderPlayerDetailModal(S.detailPlayer) : ''}`;
+}
+
+function doRoll() {
+  S.lastResult = processTurn(S.gs, STAGES_DATA, EVENTS_DATA, GOALS_DATA, INSURANCE_DATA);
+  S.rolled = true;
+  S.expandedBreakdown.clear();
+  const hasDamage = S.lastResult.playerResults.some(pr => pr.eventBaseDamage > 0);
+  if (hasDamage) {
+    showBeforeAfterAnimation(S.lastResult).then(() => render());
+  } else {
+    render();
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+// BEFORE-AFTER ANIMATION (実装1: 保険あり/なし演出)
+// ─────────────────────────────────────────────────────────────
+function showBeforeAfterAnimation(result) {
+  return new Promise(resolve => {
+    const overlay = document.createElement('div');
+    overlay.style.cssText = [
+      'position:fixed;inset:0;background:rgba(0,0,0,0.82);z-index:2000;',
+      'display:flex;align-items:center;justify-content:center;padding:16px;',
+      'animation:baFadeIn 0.25s ease;'
+    ].join('');
+
+    const box = document.createElement('div');
+    box.style.cssText = [
+      'background:#1a1a38;border:2px solid #3a3a70;border-radius:12px;',
+      'padding:20px;max-width:460px;width:100%;max-height:85dvh;overflow-y:auto;'
+    ].join('');
+
+    const ev = result.eventCard;
+    const catInfo = EVENTS_DATA.eventCategories[ev.category];
+
+    const headerDiv = document.createElement('div');
+    headerDiv.innerHTML = `
+      <div style="color:#7ec8e3;font-size:11px;letter-spacing:1px;margin-bottom:4px;font-weight:bold">${catInfo.name}</div>
+      <div style="font-size:17px;font-weight:bold;color:#dde;margin-bottom:14px">${ev.title}</div>`;
+    box.appendChild(headerDiv);
+
+    const hintDiv = document.createElement('div');
+    hintDiv.style.cssText = 'color:#445;font-size:12px;text-align:center;margin-top:12px;display:none';
+    hintDiv.textContent = 'タップして閉じる';
+
+    const playerDivs = [];
+    result.playerResults.forEach(pr => {
+      if (pr.eventBaseDamage <= 0) return;
+      const d = document.createElement('div');
+      d.style.cssText = 'background:#0d0d1a;border:1px solid #2a2a50;border-radius:8px;padding:12px 14px;margin-bottom:8px;';
+      d.innerHTML = `
+        <div style="font-weight:bold;color:#99b;font-size:12px;margin-bottom:6px">${pr.playerId}</div>
+        <div data-step="1" style="color:#e94560;font-size:17px;font-weight:bold">
+          保険なし：-${pr.eventBaseDamage.toFixed(1)}万円
+        </div>
+        <div data-step="2" style="display:none;margin-top:6px;font-size:14px;font-weight:bold;color:${pr.insurancePayout > 0 ? '#27ae60' : '#888'}">
+          ${pr.insurancePayout > 0
+            ? `💊 ${pr.appliedIns.join('・')}で補填：+${pr.insurancePayout.toFixed(1)}万円`
+            : '補填なし：全額負担'}
+        </div>
+        <div data-step="3" style="display:none;margin-top:8px;padding-top:8px;border-top:1px dashed #2a2a50;font-size:16px;font-weight:bold">
+          実損：<span style="color:#e94560">-${pr.eventDamage.toFixed(1)}万円</span>${pr.insurancePayout > 0 ? ' ✅' : ''}
+        </div>`;
+      box.appendChild(d);
+      playerDivs.push(d);
+    });
+
+    box.appendChild(hintDiv);
+    overlay.appendChild(box);
+    document.body.appendChild(overlay);
+
+    const closeOverlay = () => {
+      if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+      resolve();
+    };
+    overlay.addEventListener('click', closeOverlay);
+
+    // Animation: step1(即座) → step2(+0.8s) → step3(+1.6s) → 閉じる(+3.1s)
+    setTimeout(() => {
+      playerDivs.forEach(d => { d.querySelector('[data-step="2"]').style.display = 'block'; });
+      setTimeout(() => {
+        playerDivs.forEach(d => { d.querySelector('[data-step="3"]').style.display = 'block'; });
+        hintDiv.style.display = 'block';
+        setTimeout(closeOverlay, 1500);
+      }, 800);
+    }, 800);
+  });
+}
+
+function advanceTurn() {
+  S.rolled = false;
+  S.lastResult = null;
+  S.detailPlayer = null;
+  S.expandedBreakdown.clear();
+  if (S.gs.phase === "gameOver") {
+    S.phase = "results";
+  } else if (S.gs.phase === "mandatoryStop") {
+    S.phase = "insurance";
+    S.pIdx = 0;
+  }
+  // else: stay in "turn" phase
+  render();
+}
+
+// ─────────────────────────────────────────────────────────────
+// PLAYER DETAIL MODAL
+// ─────────────────────────────────────────────────────────────
+function showPlayerDetail(pid) { S.detailPlayer = pid; render(); }
+function hidePlayerDetail()     { S.detailPlayer = null; render(); }
+function toggleBreakdown(pid)   {
+  if (S.expandedBreakdown.has(pid)) S.expandedBreakdown.delete(pid);
+  else S.expandedBreakdown.add(pid);
+  render();
+}
+
+const _INS_NAMES = { medical:"医療保険", cancer:"がん保険", disability:"就業不能保険",
+  accident:"傷害保険", wholeLife:"終身保険", nursing:"介護保険（民間）",
+  personalPension:"個人年金保険", variableAnnuity:"変額・外貨建て保険" };
+
+function renderPlayerDetailModal(pid) {
+  const player = S.gs.players.find(p => p.id === pid);
+  if (!player) return "";
+  const lifestyle = S.gs.lifestyle;
+
+  // ── Lifestyle section ──
+  const keyInsHtml = lifestyle.keyInsurance.map(id =>
+    `<span class="tag tag-ins">${_INS_NAMES[id] || id}</span>`).join(" ");
+  const lifestyleHtml = `
+    <div style="background:#0d1a2a; border:1px solid #2a4a6a; border-radius:6px; padding:12px; margin-bottom:14px;">
+      <div class="modal-section-title">ライフスタイル</div>
+      <div style="font-size:16px; font-weight:bold; margin-bottom:4px;">${lifestyle.name}
+        <span style="font-size:12px; color:#f39c12; margin-left:6px">難易度 ${"★".repeat(lifestyle.difficulty)}${"☆".repeat(5-lifestyle.difficulty)}</span>
+      </div>
+      <div style="color:#99a; font-size:12px; margin-bottom:8px;">${lifestyle.description}</div>
+      <div style="font-size:12px; color:#778;">初期資産: <strong style="color:#27ae60">${lifestyle.initialAssets}万円</strong></div>
+      <div style="margin-top:8px;"><span style="font-size:11px; color:#778;">重要な保険: </span>${keyInsHtml}</div>
+    </div>`;
+
+  // ── Goals section ──
+  const goalHtml = player.goals.map(pg => {
+    const goal = GOALS_DATA.goalCards.find(g => g.id === pg.goalId);
+    if (!goal) return "";
+    const reqIns = goal.requiredInsurance.map(id => _INS_NAMES[id] || id);
+    const insEnrolled = goal.requiredInsurance.length === 0 ||
+      goal.requiredInsurance.some(rid => player.insurances.some(pi => pi.insuranceId === rid));
+    const insBadge = goal.requiredInsurance.length > 0
+      ? (insEnrolled
+          ? `<span style="color:#27ae60; font-size:11px">✓ 保険加入済</span>`
+          : `<span style="color:#e94560; font-size:11px">⚠ 未加入</span>`)
+      : "";
+    const missedBadge = player.goalMissedEvents && player.goalMissedEvents.includes(pg.goalId)
+      ? `<span style="color:#e94560; font-size:11px"> ⚠ イベント被弾</span>` : "";
+    return `
+      <div style="border:1px solid #2a2a50; border-radius:5px; padding:8px; margin-bottom:6px; background:#0e0e22;">
+        <div style="display:flex; align-items:center; gap:6px; margin-bottom:4px; flex-wrap:wrap;">
+          <span class="goal-type goal-type-${goal.type}">${goal.type}タイプ</span>
+          <span style="font-size:13px; font-weight:bold;">${goal.title}</span>
+        </div>
+        <div style="font-size:11px; color:#778; margin-bottom:4px;">${goal.achievementNote}</div>
+        ${goal.hasRecurringCost ? `<div style="font-size:11px; color:#f39c12;">月額支出: ${pg.monthlySpend.toLocaleString()}円/月</div>` : ""}
+        ${goal.requiredInsurance.length > 0 ? `<div style="font-size:11px; color:#7ec8e3; margin-top:3px;">必要な保険: ${reqIns.join("・")} ${insBadge}${missedBadge}</div>` : ""}
+      </div>`;
+  }).join("");
+
+  // ── Insurance section ──
+  const totalMonthly = player.insurances.reduce((s, i) => s + i.monthlyPremium, 0);
+  const insListHtml = player.insurances.length > 0
+    ? player.insurances.map(pi => {
+        const ins = INSURANCE_DATA.insuranceTypes.find(i => i.id === pi.insuranceId);
+        const annualM = ((pi.monthlyPremium * 12) / 10000).toFixed(1);
+        return `<div class="breakdown-item">
+          <span>${ins?.name || pi.insuranceId}</span>
+          <span style="color:#f39c12">${fmtYen(pi.monthlyPremium)}/月 <span style="color:#778">(年${annualM}万円)</span></span>
+        </div>`;
+      }).join("") +
+      `<div class="breakdown-item" style="border-top:1px solid #2a2a50; margin-top:4px; padding-top:6px; font-weight:bold;">
+        <span>合計</span><span style="color:#e94560">${fmtYen(totalMonthly)}/月</span>
+      </div>`
+    : `<div style="color:#778; font-size:12px; padding:4px 0;">保険未加入</div>`;
+
+  return `
+    <div class="modal-overlay" onclick="hidePlayerDetail()"></div>
+    <div class="modal-panel">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; padding-bottom:10px; border-bottom:1px solid #2a2a50;">
+        <h2 style="margin:0; color:#dde; font-size:16px;">${player.id} の詳細情報</h2>
+        <button onclick="hidePlayerDetail()" style="background:none; border:none; color:#aab; font-size:24px; cursor:pointer; line-height:1; padding:0 4px;">✕</button>
+      </div>
+
+      ${lifestyleHtml}
+
+      <div style="margin-bottom:14px;">
+        <div class="modal-section-title">目的カード（${player.goals.length}枚）</div>
+        ${goalHtml || '<div style="color:#778; font-size:12px;">なし</div>'}
+      </div>
+
+      <div style="margin-bottom:14px;">
+        <div class="modal-section-title">加入中の保険</div>
+        <div style="background:#0d0d20; border:1px solid #2a2a50; border-radius:6px; padding:10px;">
+          ${insListHtml}
+        </div>
+      </div>
+
+      <div>
+        <div class="modal-section-title">現在の資産</div>
+        <div style="font-size:22px; font-weight:bold; padding:4px 0;">${fmtAsset(player.assets)}</div>
+      </div>
+    </div>`;
+}
+
+// ─────────────────────────────────────────────────────────────
+// EXPENSE BREAKDOWN ACCORDION (post-roll)
+// ─────────────────────────────────────────────────────────────
+function buildBreakdownAccordion(result) {
+  if (!result) return "";
+  const rows = result.playerResults.map(pr => {
+    const player = S.gs.players.find(p => p.id === pr.playerId);
+    if (!player) return "";
+    const isOpen = S.expandedBreakdown.has(pr.playerId);
+    const years = pr.years;
+
+    // Insurance breakdown rows
+    const insRows = player.insurances.length > 0
+      ? player.insurances.map(pi => {
+          const ins = INSURANCE_DATA.insuranceTypes.find(i => i.id === pi.insuranceId);
+          const cost = ((pi.monthlyPremium * 12) / 10000 * years).toFixed(1);
+          return `<div class="breakdown-item breakdown-sub">
+            <span>${ins?.name || pi.insuranceId} <span style="color:#556">(${fmtYen(pi.monthlyPremium)}/月)</span></span>
+            <span style="color:#e94560">-${cost}万円</span>
+          </div>`;
+        }).join("")
+      : `<div class="breakdown-sub" style="color:#778; padding:2px 0;">保険なし</div>`;
+
+    // Goal spending breakdown rows
+    const goalRows = player.goals.map(pg => {
+      const goal = GOALS_DATA.goalCards.find(g => g.id === pg.goalId);
+      if (!goal || !goal.hasRecurringCost || !goal.activeStages.includes(pr.stageId)) return "";
+      const cost = ((pg.monthlySpend * 12) / 10000 * years).toFixed(1);
+      return `<div class="breakdown-item breakdown-sub">
+        <span>${goal.title}</span>
+        <span style="color:#e94560">-${cost}万円</span>
+      </div>`;
+    }).filter(Boolean).join("");
+
+    const bodyHtml = isOpen ? `
+      <div class="breakdown-body">
+        <div class="breakdown-item">
+          <span style="color:#27ae60">📈 収入（${years}年分）</span>
+          <span style="color:#27ae60; font-weight:bold">+${pr.income.toFixed(1)}万円</span>
+        </div>
+        <div class="breakdown-item">
+          <span>🏠 基礎生活費（${years}年分）</span>
+          <span style="color:#e94560">-${pr.basicExpense.toFixed(1)}万円</span>
+        </div>
+        ${pr.premium > 0 ? `
+        <div class="breakdown-item" style="border-bottom:none;">
+          <span>🛡 保険料合計（${years}年分）</span>
+          <span style="color:#e94560">-${pr.premium.toFixed(1)}万円</span>
+        </div>
+        ${insRows}` : ""}
+        ${pr.goalSpend > 0 ? `
+        <div class="breakdown-item" style="border-bottom:none; margin-top:2px;">
+          <span>🎯 目的支出合計（${years}年分）</span>
+          <span style="color:#e94560">-${pr.goalSpend.toFixed(1)}万円</span>
+        </div>
+        ${goalRows}` : ""}
+        ${pr.eventDamage > 0 ? `
+        <div class="breakdown-item" style="margin-top:2px;">
+          <span>⚡ イベント損害（実質負担）</span>
+          <span style="color:#e94560">-${pr.eventDamage.toFixed(1)}万円${pr.insurancePayout > 0
+            ? ` <span style="color:#27ae60; font-size:10px">(保険給付 +${pr.insurancePayout.toFixed(1)}万)</span>` : ""}</span>
+        </div>` : ""}
+        ${pr.eventGain > 0 ? `
+        <div class="breakdown-item">
+          <span>🍀 ラッキー給付</span>
+          <span style="color:#f39c12; font-weight:bold">+${pr.eventGain.toFixed(1)}万円</span>
+        </div>` : ""}
+        <div class="breakdown-item" style="border-top:1px solid #3a3a70; margin-top:4px; padding-top:6px; font-weight:bold; font-size:13px;">
+          <span>純変動</span>
+          <span class="${pr.netChange >= 0 ? 'pos' : 'neg'}">${fmt(pr.netChange)}</span>
+        </div>
+      </div>` : "";
+
+    return `
+      <div>
+        <div class="breakdown-header" onclick="toggleBreakdown('${pr.playerId}')">
+          <span><strong>${pr.playerId}</strong> の支出内訳</span>
+          <span style="color:#7ec8e3; font-size:12px">${isOpen ? "▲ 閉じる" : "▼ 開く"}</span>
+        </div>
+        ${bodyHtml}
+      </div>`;
+  }).join("");
+
+  return `
+    <div style="margin-top:14px;">
+      <div style="color:#7ec8e3; font-size:12px; font-weight:bold; margin-bottom:4px; letter-spacing:0.5px;">
+        💰 支出内訳（名前をクリックで展開）
+      </div>
+      ${rows}
+    </div>`;
+}
+
+// ─────────────────────────────────────────────────────────────
+// SCREEN 5: Results
+// ─────────────────────────────────────────────────────────────
+function renderResults() {
+  const scores = S.gs.players.map(p => ({ player: p, ...calculateFinalScore(p, GOALS_DATA) }));
+  scores.sort((a, b) => b.totalScore - a.totalScore);
+
+  const rankingHtml = scores.map((s, rank) => {
+    const wlRecord = s.player.insurances.find(i => i.insuranceId === "wholeLife");
+    const deathBenefitNote = wlRecord && wlRecord.deathBenefit > 0
+      ? `<div class="score-detail" style="color:#f39c12">終身保険 死亡保険金 +${wlRecord.deathBenefit}万円 を受け取りました</div>`
+      : "";
+    const optBonusLabel = s.optCostBonusScore > 0
+      ? `<span style="color:#27ae60">＋ライフイベント: ${s.optCostBonusScore}点</span>` : "";
+    const penaltyLabel = s.bankruptPenalty > 0
+      ? `<span style="color:#e94560">－準備不足: ${s.bankruptPenalty}点</span>` : "";
+    return `
+    <div class="score-row">
+      <div class="score-rank">${rank+1}位</div>
+      <div class="score-name">${s.player.id}</div>
+      <div>
+        <div class="score-detail">達成率: ${s.achievementRate}%（${s.achievedCount}/${s.totalCount}枚達成） ＋ボーナス: ${s.bonusScore}点 ${optBonusLabel} ${penaltyLabel}</div>
+        <div class="score-detail">最終資産: ${s.finalAssets.toFixed(1)}万円 ${s.finalAssets < 0 ? `<span style='color:#e94560'>（準備不足 ${Math.abs(s.finalAssets).toFixed(1)}万円）</span>` : ""}</div>
+        ${deathBenefitNote}
+      </div>
+      <div class="score-total">${s.totalScore}点</div>
+    </div>`;
+  }).join("");
+
+  const playerDetails = scores.map(s => {
+    const goalRows = s.goalResults.map(gr => {
+      const badge = gr.level === "achieved" ? `<span class="badge-achieved">達成</span>`
+                  : gr.level === "partialAchieved" ? `<span class="badge-partial">一部達成</span>`
+                  : `<span class="badge-fail">未達成</span>`;
+      // 一部達成・未達成の理由メモ
+      let reasonNote = "";
+      if (gr.level !== "achieved") {
+        const reasons = [];
+        if ((gr.type === "A" || gr.type === "C") && gr.spendScore < 1) {
+          reasons.push(gr.spendScore === 0 ? "支出継続できず" : "支出を減額していた");
+        }
+        if ((gr.type === "B" || gr.type === "C") && gr.insLevel !== "achieved") {
+          reasons.push(gr.insLevel === "notAchieved" ? "保険未加入/イベント被弾" : "保険未加入（イベントなし）");
+        }
+        if (reasons.length > 0) reasonNote = `<div style="font-size:0.78em;color:#888;margin-top:2px">${reasons.join("・")}</div>`;
+      }
+      return `<tr><td>${gr.title}${reasonNote}</td><td><span class="goal-type goal-type-${gr.type}">${gr.type}</span></td><td>${badge}</td><td>${gr.scoreWeight}</td></tr>`;
+    }).join("");
+    return `
+      <div class="panel">
+        <div class="panel-title">${s.player.id} — 目的カード達成状況</div>
+        <table class="results-table">
+          <thead><tr><th>目的カード</th><th>タイプ</th><th>達成</th><th>得点重み</th></tr></thead>
+          <tbody>${goalRows}</tbody>
+        </table>
+        <div style="margin-top:8px">加入中の保険: ${s.player.insurances.length > 0
+          ? s.player.insurances.map(i => {
+              const ins = INSURANCE_DATA.insuranceTypes.find(t => t.id === i.insuranceId);
+              return `<span class="tag tag-ins">${ins?.name} (${fmtYen(i.monthlyPremium)}/月)</span>`;
+            }).join("")
+          : "<span class='tip'>なし</span>"}</div>
+        ${s.optCostBonusScore > 0 ? `
+        <div style="margin-top:8px; padding:8px; background:#f0fdf4; border:1px solid #86efac; border-radius:6px">
+          <span style="font-weight:bold; color:#16a34a">🎉 ライフイベントボーナス ＋${s.optCostBonusScore}点</span>
+          <div style="margin-top:4px; font-size:0.85em; color:#555">
+            ${s.optCostBonusDetails.map(d => {
+              const labelMap = { marriage:"結婚式・披露宴・新婚旅行", childbirth:"出産費用・育児準備", retirement:"退職後ライフスタイル整備", inheritance:"葬儀・相続手続き" };
+              return `${labelMap[d.stopId] || d.stopId}: ＋${d.points}点`;
+            }).join("　")}
+          </div>
+        </div>` : ""}
+      </div>`;
+  }).join("");
+
+  app.innerHTML = `
+    <h1>ゲーム終了 — 最終結果</h1>
+    <div class="panel">
+      <div class="panel-title">ランキング</div>
+      ${rankingHtml}
+      <div class="tip" style="margin-top:8px">スコア = 達成率 ＋ 達成ボーナス（達成枚数×10点）＋ ライフイベントボーナス（結婚+10 / 出産+5 / 定年+5 / 相続+8）－ 準備不足ペナルティ（赤字50万円ごとに-5点）</div>
+    </div>
+    ${playerDetails}
+    <div style="text-align:center; margin-top:16px">
+      <button class="btn-primary" onclick="restartGame()">もう一度プレイ</button>
+    </div>`;
+}
+
+function restartGame() {
+  S.phase = "setup"; S.gs = null; S.pIdx = 0;
+  S.pendGoals = {}; S.pendIns = {}; S.pendOptCost = {};
+  S.lastResult = null; S.rolled = false;
+  render();
+}
+
+// Start
+render();
+</script>
+</body>
+</html>
